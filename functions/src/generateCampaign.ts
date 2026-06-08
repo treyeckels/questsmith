@@ -7,6 +7,7 @@ if (!admin.apps.length) {
     admin.initializeApp();
 }
 
+const GEMINI_MODEL = 'gemini-2.5-flash';
 const geminiApiKey = defineSecret('GEMINI_API_KEY');
 
 interface CampaignGenerationRequest {
@@ -47,6 +48,67 @@ function parseJsonResponse(raw: string): unknown {
         : trimmed;
 
     return JSON.parse(jsonText);
+}
+
+function getGeminiErrorDetails(error: unknown): { status?: number; message: string } {
+    const message = error instanceof Error ? error.message : String(error);
+    let status: number | undefined;
+
+    if (error && typeof error === 'object' && 'status' in error) {
+        const rawStatus = (error as { status?: unknown }).status;
+        if (typeof rawStatus === 'number') {
+            status = rawStatus;
+        }
+    }
+
+    if (status === undefined) {
+        const match = message.match(/\[(\d{3})\s/);
+        if (match) {
+            status = Number(match[1]);
+        }
+    }
+
+    return { status, message };
+}
+
+function getErrorMessage(error: unknown): string {
+    const { status, message } = getGeminiErrorDetails(error);
+
+    if (message.includes('prepayment credits are depleted')) {
+        return 'Gemini API credits are depleted. Add billing or credits in Google AI Studio, then try again.';
+    }
+
+    if (status === 429) {
+        return 'Gemini rate limit reached. Wait a moment and try again.';
+    }
+
+    if (status === 404 && message.includes('no longer available')) {
+        return 'The configured Gemini model is no longer available. Deploy the latest version of the app.';
+    }
+
+    if (status === 403 || message.toLowerCase().includes('api key')) {
+        return 'Gemini API key is invalid or unauthorized. Check GEMINI_API_KEY in Firebase secrets.';
+    }
+
+    if (error instanceof SyntaxError) {
+        return 'Gemini returned malformed JSON. Please try again.';
+    }
+
+    return 'Campaign generation failed. Please try again.';
+}
+
+function getErrorStatus(error: unknown): number {
+    const { status, message } = getGeminiErrorDetails(error);
+
+    if (status === 429 || message.includes('prepayment credits are depleted')) {
+        return 429;
+    }
+
+    if (status === 403) {
+        return 403;
+    }
+
+    return 500;
 }
 
 function setCorsHeaders(res: { set: (key: string, value: string) => void }) {
@@ -99,7 +161,7 @@ export const generateCampaignApi = onRequest(
 
             const genAI = new GoogleGenerativeAI(apiKey);
             const model = genAI.getGenerativeModel({
-                model: 'gemini-2.0-flash',
+                model: GEMINI_MODEL,
                 generationConfig: {
                     responseMimeType: 'application/json',
                 },
@@ -120,7 +182,7 @@ export const generateCampaignApi = onRequest(
             res.status(200).json({ campaign });
         } catch (error) {
             console.error('Campaign generation failed:', error);
-            res.status(500).json({ error: 'Campaign generation failed. Please try again.' });
+            res.status(getErrorStatus(error)).json({ error: getErrorMessage(error) });
         }
     },
 );
