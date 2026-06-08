@@ -2,7 +2,7 @@
     position: relative;
     width: min(100%, 26rem);
     margin: clamp(0.5rem, 2vw, 1rem) auto 0;
-    min-height: min(100dvh - 2rem, 52rem);
+    min-height: auto;
     background: url('/img/friends_box_merge.png') no-repeat center top;
     background-size: 100% 100%;
     display: flex;
@@ -10,6 +10,12 @@
     gap: clamp(1rem, 4vw, 1.5rem);
     padding: clamp(6.25rem, 24vw, 7.75rem) clamp(1.25rem, 6vw, 2rem) clamp(4.5rem, 16vw, 6rem);
     box-sizing: border-box;
+}
+
+@media (min-width: 40rem) and (min-height: 48rem) {
+    .fantasy-frame {
+        min-height: min(100dvh - 2rem, 52rem);
+    }
 }
 
 .fantasy-frame__header {
@@ -44,7 +50,7 @@
 }
 
 .fantasy-frame__body {
-    flex: 1 0 auto;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -54,11 +60,22 @@
 .fantasy-frame__footer {
     flex-shrink: 0;
     width: 100%;
-    margin-top: auto;
-    padding-top: clamp(0.5rem, 2vw, 0.75rem);
+    margin-top: 0;
+    padding-top: clamp(1rem, 4vw, 1.5rem);
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
+}
+
+@media (min-width: 40rem) and (min-height: 48rem) {
+    .fantasy-frame__body {
+        flex: 1 0 auto;
+    }
+
+    .fantasy-frame__footer {
+        margin-top: auto;
+        padding-top: clamp(0.5rem, 2vw, 0.75rem);
+    }
 }
 
 .fantasy-frame__footer-icon {

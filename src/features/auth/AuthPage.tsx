@@ -277,16 +277,18 @@ const AuthPage: React.FC = () => {
                             >
                                 Create Account
                             </FantasyButton>
-
-                            <FantasyButton
-                                variant="google"
-                                disabled={submitting}
-                                onClick={handleGoogleSignIn}
-                            >
-                                Continue with Google
-                            </FantasyButton>
                         </div>
                     </form>
+
+                    <div className="auth-oauth">
+                        <FantasyButton
+                            variant="google"
+                            disabled={submitting}
+                            onClick={handleGoogleSignIn}
+                        >
+                            Continue with Google
+                        </FantasyButton>
+                    </div>
                 </FantasyFrame>
             </IonContent>
         </IonPage>

@@ -39,18 +39,23 @@
 }
 
 .fantasy-button--primary {
+    --background: linear-gradient(180deg, var(--qs-green-light) 0%, var(--qs-green) 100%);
     --color: var(--qs-text);
-    background: linear-gradient(180deg, var(--qs-green-light) 0%, var(--qs-green) 100%);
 }
 
 .fantasy-button--secondary {
+    --background: linear-gradient(180deg, var(--qs-blue-light) 0%, var(--qs-blue) 100%);
     --color: var(--qs-text);
-    background: linear-gradient(180deg, var(--qs-blue-light) 0%, var(--qs-blue) 100%);
 }
 
 .fantasy-button--google {
+    --background: rgba(255, 255, 255, 0.08);
+    --background-hover: rgba(255, 255, 255, 0.12);
+    --background-activated: rgba(255, 255, 255, 0.1);
     --color: var(--qs-text-muted);
-    background: rgba(255, 255, 255, 0.04);
+    --border-width: 2px;
+    --border-color: var(--qs-gold);
+    --border-style: solid;
     font-size: clamp(0.75rem, 2.8vw, 0.85rem);
     letter-spacing: 0.08em;
     text-transform: none;
