@@ -4,6 +4,47 @@ import type { Character } from '../character/characterTypes';
 
 export type GameStatus = 'active' | 'completed' | 'defeated';
 
+export type ChoiceRiskLevel = 'low' | 'medium' | 'high';
+
+export interface SceneChoice {
+    id: string;
+    label: string;
+    intent: string;
+    riskLevel?: ChoiceRiskLevel;
+}
+
+export interface Scene {
+    id: string;
+    turnNumber: number;
+    locationId: string;
+    narrative: string;
+    choices: SceneChoice[];
+}
+
+export type TurnEventType =
+    | 'combat'
+    | 'item_gain'
+    | 'item_loss'
+    | 'gold_change'
+    | 'xp_gain'
+    | 'quest_update'
+    | 'location_change';
+
+export interface TurnEvent {
+    type: TurnEventType;
+    description: string;
+}
+
+export interface TurnDocument {
+    turnNumber: number;
+    selectedChoiceId: string;
+    selectedChoiceLabel: string;
+    sceneSummary: string;
+    locationId: string;
+    events: TurnEvent[];
+    createdAt: firebase.firestore.Timestamp;
+}
+
 export interface GameDocument {
     userId: string;
     status: GameStatus;
@@ -11,7 +52,7 @@ export interface GameDocument {
     updatedAt: firebase.firestore.Timestamp;
     character: Character;
     campaign: Campaign | null;
-    currentScene: null;
+    currentScene: Scene | null;
     inventory: [];
     quests: [];
 }
@@ -21,4 +62,9 @@ export interface GameSummary {
     character: Character;
     campaign: Campaign | null;
     status: GameStatus;
+}
+
+export interface ActiveGame extends GameSummary {
+    campaign: Campaign;
+    currentScene: Scene | null;
 }
