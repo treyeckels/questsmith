@@ -35,7 +35,7 @@
 .auth-page__content {
     --background: transparent;
     --padding-top: 0.5rem;
-    --padding-bottom: 1.25rem;
+    --padding-bottom: max(env(safe-area-inset-bottom), 1.25rem);
     --padding-start: 0.75rem;
     --padding-end: 0.75rem;
 }
@@ -188,11 +188,11 @@
     flex-direction: column;
     gap: clamp(0.85rem, 3vw, 1.15rem);
     margin-top: 0.25rem;
-    margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
 }
 
-.auth-actions .fantasy-button--google {
-    margin-top: clamp(0.15rem, 1vw, 0.35rem);
+.auth-oauth {
+    margin-top: clamp(0.35rem, 2vw, 0.75rem);
+    padding-bottom: clamp(0.75rem, 3vw, 1.25rem);
 }
 
 .auth-divider {
