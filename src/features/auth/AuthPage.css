@@ -1,15 +1,26 @@
-.auth-page ion-header,
-.auth-page ion-toolbar {
-    display: none !important;
+.auth-page {
+    --ion-background-color: var(--qs-green);
+}
+
+.auth-page__header ion-toolbar {
+    --background: var(--qs-auth-bg);
+    --color: var(--qs-text);
+    --border-color: var(--qs-gold);
+}
+
+.auth-page__header ion-title {
+    font-family: var(--qs-font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .auth-page__content {
-    --background: var(--qs-bg-charcoal);
-    --padding-top: 0;
+    --background: var(--qs-auth-bg);
     --padding-bottom: 1rem;
     --padding-start: 0.75rem;
     --padding-end: 0.75rem;
-    --offset-top: 0;
 }
 
 .auth-page__content::part(scroll) {

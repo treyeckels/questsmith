@@ -6,6 +6,7 @@
     --qs-bronze: #8b6914;
     --qs-green: #1f4d2c;
     --qs-green-light: #2a6340;
+    --qs-auth-bg: linear-gradient(180deg, var(--qs-green-light) 0%, var(--qs-green) 100%);
     --qs-blue: #1a3a5c;
     --qs-blue-light: #234d75;
     --qs-text: #f5eedc;
