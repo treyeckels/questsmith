@@ -1,0 +1,14 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "functions": {
+    "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"],
+    "source": "functions"
+  },
+  "hosting": {
+    "public": "dist",
+    "site": "quest-smith",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+  }
+}
