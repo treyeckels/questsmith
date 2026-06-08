@@ -15,7 +15,7 @@ import FantasyButton from '../../shared/components/FantasyButton';
 import FantasyFrame from '../../shared/components/FantasyFrame';
 import { useAuth } from '../../shared/hooks/useAuth';
 import { useCharacterCreation } from '../../shared/hooks/useCharacterCreation';
-import { hasActiveGame } from '../game/gameService';
+import { gameNeedsCampaignGeneration, getActiveGame } from '../game/gameService';
 import { CLASSES } from './characterConfig';
 import CharacterSummary from './components/CharacterSummary';
 import ClassCard from './components/ClassCard';
@@ -40,7 +40,7 @@ const CharacterCreationPage: React.FC = () => {
         submit,
     } = useCharacterCreation({
         userId: user?.uid ?? '',
-        onSuccess: () => history.replace('/game'),
+        onSuccess: () => history.replace('/campaign/generate'),
     });
 
     useEffect(() => {
@@ -50,11 +50,18 @@ const CharacterCreationPage: React.FC = () => {
 
         let cancelled = false;
 
-        hasActiveGame(user.uid)
-            .then((exists) => {
-                if (!cancelled && exists) {
-                    history.replace('/game');
+        getActiveGame(user.uid)
+            .then((game) => {
+                if (cancelled || !game) {
+                    return;
                 }
+
+                if (gameNeedsCampaignGeneration(game)) {
+                    history.replace('/campaign/generate');
+                    return;
+                }
+
+                history.replace('/game');
             })
             .catch(() => {
                 // Protected route already ensures auth; allow creation on query failure.

@@ -9,6 +9,7 @@ function mapGameDoc(id: string, data: GameDocument): GameSummary {
     return {
         id,
         character: data.character,
+        campaign: data.campaign ?? null,
         status: data.status,
     };
 }
@@ -58,16 +59,29 @@ export async function getActiveGame(userId: string): Promise<GameSummary | null>
     }
 }
 
+export function gameNeedsCampaignGeneration(game: GameSummary): boolean {
+    return !game.campaign;
+}
+
+export async function getPostAuthPath(userId: string): Promise<string> {
+    const game = await getActiveGame(userId);
+
+    if (!game) {
+        return '/character/create';
+    }
+
+    if (gameNeedsCampaignGeneration(game)) {
+        return '/campaign/generate';
+    }
+
+    return '/game';
+}
+
 export async function createGameWithCharacter(
     userId: string,
     input: CharacterCreationInput,
 ): Promise<string> {
     return createCharacterGame(userId, input);
-}
-
-export async function getPostAuthPath(userId: string): Promise<string> {
-    const hasGame = await hasActiveGame(userId);
-    return hasGame ? '/game' : '/character/create';
 }
 
 export type { Character };

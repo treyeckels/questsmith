@@ -1,0 +1,202 @@
+.campaign-page {
+    --ion-background-color: var(--qs-bg-charcoal);
+    background: linear-gradient(180deg, #121216 0%, var(--qs-bg-charcoal) 100%);
+}
+
+.campaign-page__header {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.campaign-page__header::after {
+    display: none;
+}
+
+.campaign-page__header ion-toolbar {
+    --background: transparent;
+    --color: var(--qs-text);
+    --border-width: 0 0 1px 0;
+    --border-color: var(--qs-gold);
+    --border-style: solid;
+    --padding-top: max(env(safe-area-inset-top), 0.75rem);
+    --padding-bottom: 0.75rem;
+}
+
+.campaign-page__header ion-title {
+    font-family: var(--qs-font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.campaign-page__content {
+    --background: transparent;
+    --padding-top: 0.5rem;
+    --padding-bottom: max(env(safe-area-inset-bottom), 1.25rem);
+    --padding-start: 0.75rem;
+    --padding-end: 0.75rem;
+}
+
+.campaign-page .fantasy-frame {
+    width: min(100%, 40rem);
+    min-height: auto;
+}
+
+.campaign-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.85rem;
+    padding: clamp(1rem, 4vw, 2rem) 0.5rem;
+}
+
+.campaign-state__spinner {
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--qs-gold);
+}
+
+.campaign-state__icon {
+    font-size: 2.5rem;
+    color: var(--qs-gold);
+}
+
+.campaign-state__title {
+    margin: 0;
+    font-family: var(--qs-font-display);
+    font-size: clamp(1.1rem, 4vw, 1.35rem);
+    font-weight: 600;
+    color: var(--qs-text);
+}
+
+.campaign-state__text {
+    margin: 0;
+    font-family: var(--qs-font-body);
+    font-size: clamp(0.82rem, 3vw, 0.92rem);
+    line-height: 1.45;
+    color: var(--qs-text-muted);
+    max-width: 22rem;
+}
+
+.campaign-state__text strong {
+    color: var(--qs-gold-light);
+}
+
+.campaign-state--error .fantasy-button {
+    margin-top: 0.5rem;
+    max-width: 14rem;
+}
+
+.campaign-preview {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.85rem, 3vw, 1.15rem);
+}
+
+.campaign-preview__header {
+    text-align: center;
+}
+
+.campaign-preview__icon {
+    font-size: 2rem;
+    color: var(--qs-gold);
+    margin-bottom: 0.35rem;
+}
+
+.campaign-preview__title {
+    margin: 0;
+    font-family: var(--qs-font-display);
+    font-size: clamp(1.15rem, 4.5vw, 1.45rem);
+    font-weight: 600;
+    color: var(--qs-gold-light);
+    line-height: 1.2;
+}
+
+.campaign-preview__hook {
+    margin: 0.5rem 0 0;
+    font-family: var(--qs-font-body);
+    font-size: clamp(0.82rem, 3vw, 0.92rem);
+    line-height: 1.45;
+    color: var(--qs-text-muted);
+}
+
+.campaign-preview__section {
+    padding: 0.75rem;
+    border: 1px solid rgba(201, 164, 92, 0.22);
+    background: rgba(0, 0, 0, 0.18);
+}
+
+.campaign-preview__section h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.45rem;
+    font-family: var(--qs-font-display);
+    font-size: clamp(0.78rem, 2.8vw, 0.88rem);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--qs-gold);
+}
+
+.campaign-preview__section h2 ion-icon {
+    font-size: 1rem;
+}
+
+.campaign-preview__section p {
+    margin: 0;
+    font-family: var(--qs-font-body);
+    font-size: clamp(0.78rem, 2.8vw, 0.88rem);
+    line-height: 1.45;
+    color: var(--qs-text);
+}
+
+.campaign-preview__highlight {
+    color: var(--qs-gold-light) !important;
+    font-weight: 600;
+}
+
+.campaign-preview__muted {
+    margin-top: 0.35rem !important;
+    color: var(--qs-text-muted) !important;
+}
+
+.campaign-preview__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.campaign-preview__list li {
+    font-family: var(--qs-font-body);
+    font-size: clamp(0.75rem, 2.8vw, 0.85rem);
+    line-height: 1.4;
+    color: var(--qs-text-muted);
+}
+
+.campaign-preview__list strong {
+    color: var(--qs-text);
+}
+
+.campaign-preview__list span {
+    display: block;
+    margin-top: 0.15rem;
+}
+
+.campaign-preview__list--compact li {
+    padding-bottom: 0.15rem;
+    border-bottom: 1px solid rgba(201, 164, 92, 0.1);
+}
+
+.campaign-preview__list--compact li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.campaign-preview__actions {
+    margin-top: 0.25rem;
+}

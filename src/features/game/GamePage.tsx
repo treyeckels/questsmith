@@ -21,7 +21,8 @@ import { useHistory } from 'react-router-dom';
 import { getClassDefinition, getPortraitDefinition, HEROES_SPRITE_URL } from '../character/characterConfig';
 import type { Character } from '../character/characterTypes';
 import { signOut } from '../auth/authService';
-import { getActiveGame } from './gameService';
+import type { Campaign } from '../campaign/campaignTypes';
+import { gameNeedsCampaignGeneration, getActiveGame } from './gameService';
 import { useAuth } from '../../shared/hooks/useAuth';
 import './GamePage.css';
 
@@ -31,6 +32,7 @@ const GamePage: React.FC = () => {
     const history = useHistory();
     const { user } = useAuth();
     const [character, setCharacter] = useState<Character | null>(null);
+    const [campaign, setCampaign] = useState<Campaign | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -51,7 +53,13 @@ const GamePage: React.FC = () => {
                     return;
                 }
 
+                if (gameNeedsCampaignGeneration(game)) {
+                    history.replace('/campaign/generate');
+                    return;
+                }
+
                 setCharacter(game.character);
+                setCampaign(game.campaign);
             })
             .finally(() => {
                 if (!cancelled) {
@@ -117,9 +125,19 @@ const GamePage: React.FC = () => {
                     <li><IonIcon icon={cashOutline} aria-hidden="true" /><span>Gold</span><strong>{character.gold}</strong></li>
                 </ul>
 
+                {campaign && (
+                    <section className="game-page__campaign">
+                        <h3>{campaign.title}</h3>
+                        <p className="game-page__campaign-hook">{campaign.mainQuestHook}</p>
+                        <p className="game-page__campaign-objective">
+                            <strong>Objective:</strong> {campaign.currentObjective}
+                        </p>
+                    </section>
+                )}
+
                 <IonText>
                     <p className="game-page__placeholder">
-                        Campaign generation is coming in Epic 3. Your hero has been saved and is ready for adventure.
+                        Scene gameplay and choices are coming in Epic 4. Your campaign is saved and ready.
                     </p>
                 </IonText>
 

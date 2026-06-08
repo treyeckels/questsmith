@@ -94,6 +94,40 @@
     color: var(--qs-text);
 }
 
+.game-page__campaign {
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    border: 1px solid rgba(201, 164, 92, 0.28);
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.game-page__campaign h3 {
+    margin: 0;
+    font-family: var(--qs-font-display);
+    font-size: 1.1rem;
+    color: var(--qs-gold-light);
+}
+
+.game-page__campaign-hook {
+    margin: 0.5rem 0 0;
+    font-family: var(--qs-font-body);
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--qs-text-muted);
+}
+
+.game-page__campaign-objective {
+    margin: 0.65rem 0 0;
+    font-family: var(--qs-font-body);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--qs-text);
+}
+
+.game-page__campaign-objective strong {
+    color: var(--qs-gold);
+}
+
 .game-page__placeholder {
     margin: 0 0 1.25rem;
     font-family: var(--qs-font-body);
