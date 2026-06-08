@@ -1,6 +1,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import * as admin from 'firebase-admin';
 import { defineSecret } from 'firebase-functions/params';
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { onRequest } from 'firebase-functions/v2/https';
+
+if (!admin.apps.length) {
+    admin.initializeApp();
+}
 
 const geminiApiKey = defineSecret('GEMINI_API_KEY');
 
@@ -44,55 +49,78 @@ function parseJsonResponse(raw: string): unknown {
     return JSON.parse(jsonText);
 }
 
-export const generateCampaign = onCall(
+function setCorsHeaders(res: { set: (key: string, value: string) => void }) {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+}
+
+export const generateCampaign = onRequest(
     {
         secrets: [geminiApiKey],
         cors: true,
         invoker: 'public',
+        region: 'us-central1',
     },
-    async (request) => {
-    if (!request.auth) {
-        throw new HttpsError('unauthenticated', 'You must be signed in to generate a campaign.');
-    }
+    async (req, res) => {
+        setCorsHeaders(res);
 
-    const data = request.data as CampaignGenerationRequest;
-    if (!data?.characterName?.trim() || !data?.characterClass?.trim()) {
-        throw new HttpsError('invalid-argument', 'Character name and class are required.');
-    }
-
-    const apiKey = geminiApiKey.value();
-    if (!apiKey) {
-        throw new HttpsError('failed-precondition', 'Gemini API key is not configured on the server.');
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        generationConfig: {
-            responseMimeType: 'application/json',
-        },
-    });
-
-    try {
-        const result = await model.generateContent(buildPrompt({
-            characterName: data.characterName.trim(),
-            characterClass: data.characterClass.trim(),
-        }));
-
-        const text = result.response.text();
-        if (!text) {
-            throw new HttpsError('internal', 'Gemini returned an empty campaign response.');
+        if (req.method === 'OPTIONS') {
+            res.status(204).send('');
+            return;
         }
 
-        const campaign = parseJsonResponse(text);
-        return { campaign };
-    } catch (error) {
-        if (error instanceof HttpsError) {
-            throw error;
+        if (req.method !== 'POST') {
+            res.status(405).json({ error: 'Method not allowed' });
+            return;
         }
 
-        console.error('Campaign generation failed:', error);
-        throw new HttpsError('internal', 'Campaign generation failed. Please try again.');
-    }
+        try {
+            const authHeader = req.headers.authorization;
+            if (!authHeader?.startsWith('Bearer ')) {
+                res.status(401).json({ error: 'Unauthenticated' });
+                return;
+            }
+
+            const idToken = authHeader.split('Bearer ')[1];
+            await admin.auth().verifyIdToken(idToken);
+
+            const data = req.body as CampaignGenerationRequest;
+            if (!data?.characterName?.trim() || !data?.characterClass?.trim()) {
+                res.status(400).json({ error: 'Character name and class are required.' });
+                return;
+            }
+
+            const apiKey = geminiApiKey.value();
+            if (!apiKey) {
+                res.status(412).json({ error: 'Gemini API key is not configured on the server.' });
+                return;
+            }
+
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({
+                model: 'gemini-2.0-flash',
+                generationConfig: {
+                    responseMimeType: 'application/json',
+                },
+            });
+
+            const result = await model.generateContent(buildPrompt({
+                characterName: data.characterName.trim(),
+                characterClass: data.characterClass.trim(),
+            }));
+
+            const text = result.response.text();
+            if (!text) {
+                res.status(500).json({ error: 'Gemini returned an empty campaign response.' });
+                return;
+            }
+
+            const campaign = parseJsonResponse(text);
+            res.status(200).json({ campaign });
+        } catch (error) {
+            console.error('Campaign generation failed:', error);
+            res.status(500).json({ error: 'Campaign generation failed. Please try again.' });
+        }
     },
 );

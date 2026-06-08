@@ -141,6 +141,15 @@ firebase emulators:start --only functions
 
 Do **not** add `VITE_GEMINI_*` to the client — the key must stay server-side.
 
+Campaign generation is invoked via same-origin `POST /api/generateCampaign` (Firebase Hosting rewrite → Cloud Function). This avoids browser CORS issues with Gen2 Cloud Run.
+
+Deploy **both** after function changes:
+
+```bash
+cd functions && npm run build
+firebase deploy --only functions,hosting
+```
+
 ### Run Locally
 
 ```bash

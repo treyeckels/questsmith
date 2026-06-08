@@ -2,7 +2,6 @@
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import 'firebase/compat/functions';
 import 'firebase/compat/storage';
 import { Capacitor } from '@capacitor/core';
 
@@ -30,10 +29,6 @@ if (Capacitor.isNativePlatform()) {
 }
 
 export const db = firebase.firestore();
-export const functions = firebase.app().functions('us-central1');
 export const storage = firebase.storage();
-
-// Uncomment this line when testing with local emulator
-// functions.useEmulator('localhost', 5001);
 
 export default firebase;
