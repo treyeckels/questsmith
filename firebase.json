@@ -8,7 +8,7 @@
   },
   "hosting": {
     "public": "dist",
-    "site": "quest-smith",
+    "site": "quest-smith-2a276",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "headers": [
       {
