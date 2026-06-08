@@ -2,11 +2,15 @@
 
 QuestSmith is a mobile-first, single-player choose-your-own-adventure fantasy RPG. Gemini acts as the AI Dungeon Master—generating scenes, choices, dialogue, and flavor text—while the app controls deterministic game systems: HP, inventory, gold, XP, combat, quest status, and saved progress.
 
+## Production URL
+
+[Quest Smith](https://quest-smith.com/)
+
 ## Screenshots
 
 ![Generated campaign preview — hero stats and quest details on the adventure screen](docs/screenshots/campaign.png)
 
-*Campaign generation in QuestSmith: a randomly generated quest with hero stats and saved progress.*
+_Campaign generation in QuestSmith: a randomly generated quest with hero stats and saved progress._
 
 ## Hybrid AI Architecture
 
@@ -29,12 +33,12 @@ Gemini suggests narrative consequences; the app calculates and saves the actual 
 
 ## Current Status
 
-| Epic | Feature                                                             | Status  |
-| ---- | ------------------------------------------------------------------- | ------- |
-| 1    | Authentication (email/password, Google, sign-out, protected routes) | Done    |
-| 2    | Character creation                                                  | Done    |
-| 3    | Random campaign generation                                          | Done    |
-| 4+   | Gameplay loop, combat, inventory, quests, persistence               | Planned |
+| Epic | Feature                                                             | Status |
+| ---- | ------------------------------------------------------------------- | ------ |
+| 1    | Authentication (email/password, Google, sign-out, protected routes) | Done   |
+| 2    | Character creation                                                  | Done   |
+| 3    | Random campaign generation                                          | Done   |
+| 4+   | Gameplay loop, combat, inventory, quests, persistence               | Done   |
 
 ## Getting Started
 
