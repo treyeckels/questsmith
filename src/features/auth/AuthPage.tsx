@@ -1,4 +1,13 @@
-import { IonContent, IonIcon, IonInput, IonPage, IonText } from '@ionic/react';
+import {
+    IonContent,
+    IonHeader,
+    IonIcon,
+    IonInput,
+    IonPage,
+    IonText,
+    IonTitle,
+    IonToolbar,
+} from '@ionic/react';
 import {
     eyeOffOutline,
     eyeOutline,
@@ -168,7 +177,12 @@ const AuthPage: React.FC = () => {
 
     return (
         <IonPage className="auth-page">
-            <IonContent fullscreen className="auth-page__content">
+            <IonHeader className="auth-page__header">
+                <IonToolbar>
+                    <IonTitle>QuestSmith</IonTitle>
+                </IonToolbar>
+            </IonHeader>
+            <IonContent className="auth-page__content">
                 <FantasyFrame>
                     <section className="auth-hero">
                         <IonIcon
