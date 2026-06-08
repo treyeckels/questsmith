@@ -45,7 +45,11 @@ function parseJsonResponse(raw: string): unknown {
 }
 
 export const generateCampaign = onCall(
-    { secrets: [geminiApiKey] },
+    {
+        secrets: [geminiApiKey],
+        cors: true,
+        invoker: 'public',
+    },
     async (request) => {
     if (!request.auth) {
         throw new HttpsError('unauthenticated', 'You must be signed in to generate a campaign.');

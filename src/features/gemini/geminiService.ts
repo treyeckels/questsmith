@@ -18,7 +18,13 @@ function getCallableErrorMessage(error: unknown): string {
             return 'Character details were missing. Please create your hero again.';
         case 'functions/internal':
             return 'The Dungeon Master could not weave your campaign. Please try again.';
+        case 'functions/unavailable':
+        case 'functions/deadline-exceeded':
+            return 'Could not reach the campaign service. Redeploy functions and try again.';
         default:
+            if (firebaseError.message?.toLowerCase().includes('cors')) {
+                return 'Campaign service blocked the request. Redeploy Cloud Functions after the latest update.';
+            }
             return firebaseError.message || 'Campaign generation failed. Please try again.';
     }
 }
