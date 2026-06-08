@@ -2,15 +2,21 @@
 
 QuestSmith is a mobile-first, single-player choose-your-own-adventure fantasy RPG. Gemini acts as the AI Dungeon Master—generating scenes, choices, dialogue, and flavor text—while the app controls deterministic game systems: HP, inventory, gold, XP, combat, quest status, and saved progress.
 
+## Screenshots
+
+![Generated campaign preview — hero stats and quest details on the adventure screen](docs/screenshots/campaign.png)
+
+*Campaign generation in QuestSmith: a randomly generated quest with hero stats and saved progress.*
+
 ## Hybrid AI Architecture
 
 This project separates **creative generation** from **deterministic game logic**:
 
-| Layer | Responsibility |
-|-------|----------------|
-| **Gemini** | Scene narration, player choices, NPC dialogue, item descriptions, quest ideas |
+| Layer                 | Responsibility                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| **Gemini**            | Scene narration, player choices, NPC dialogue, item descriptions, quest ideas           |
 | **App (game engine)** | Dice rolls, combat outcomes, stat changes, inventory updates, quest status, persistence |
-| **Firebase** | Authentication, Firestore persistence, Hosting, Cloud Functions |
+| **Firebase**          | Authentication, Firestore persistence, Hosting, Cloud Functions                         |
 
 Gemini suggests narrative consequences; the app calculates and saves the actual game state. This keeps the experience dynamic while remaining fair, testable, and recoverable.
 
@@ -23,12 +29,12 @@ Gemini suggests narrative consequences; the app calculates and saves the actual 
 
 ## Current Status
 
-| Epic | Feature | Status |
-|------|---------|--------|
-| 1 | Authentication (email/password, Google, sign-out, protected routes) | Done |
-| 2 | Character creation | Planned |
-| 3 | Random campaign generation | Planned |
-| 4+ | Gameplay loop, combat, inventory, quests, persistence | Planned |
+| Epic | Feature                                                             | Status  |
+| ---- | ------------------------------------------------------------------- | ------- |
+| 1    | Authentication (email/password, Google, sign-out, protected routes) | Done    |
+| 2    | Character creation                                                  | Done    |
+| 3    | Random campaign generation                                          | Done    |
+| 4+   | Gameplay loop, combat, inventory, quests, persistence               | Planned |
 
 ## Getting Started
 
@@ -51,10 +57,10 @@ npm install --prefix functions
 
 Firebase config is loaded at build time through Vite `import.meta.env` in `src/firebase.ts`. Only variables prefixed with `VITE_` are exposed to the client.
 
-| File | When it is used | Committed? |
-|------|-----------------|------------|
-| `.env.example` | Template with placeholder values | Yes |
-| `.env.local` | Local development (`npm run dev`) | No — gitignored |
+| File              | When it is used                                                     | Committed?      |
+| ----------------- | ------------------------------------------------------------------- | --------------- |
+| `.env.example`    | Template with placeholder values                                    | Yes             |
+| `.env.local`      | Local development (`npm run dev`)                                   | No — gitignored |
 | `.env.production` | Production builds (`npm run build`) before Firebase Hosting deploys | No — gitignored |
 
 **Local development**
@@ -189,14 +195,14 @@ docs/               # SRS, user stories, architecture, prompts
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite dev server |
-| `npm run build` | Type-check and production build |
-| `npm run preview` | Preview production build locally |
-| `npm run test.unit` | Run Vitest unit tests |
-| `npm run test.e2e` | Run Cypress end-to-end tests |
-| `npm run lint` | Run ESLint |
+| Command             | Description                      |
+| ------------------- | -------------------------------- |
+| `npm run dev`       | Start Vite dev server            |
+| `npm run build`     | Type-check and production build  |
+| `npm run preview`   | Preview production build locally |
+| `npm run test.unit` | Run Vitest unit tests            |
+| `npm run test.e2e`  | Run Cypress end-to-end tests     |
+| `npm run lint`      | Run ESLint                       |
 
 ## Documentation
 
