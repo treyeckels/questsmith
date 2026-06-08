@@ -1,0 +1,73 @@
+.fantasy-frame {
+    position: relative;
+    width: min(100%, 26rem);
+    margin: 0 auto;
+    min-height: min(100dvh - 2rem, 52rem);
+    background: url('/img/friends_box_merge.png') no-repeat center top;
+    background-size: 100% 100%;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(5.75rem, 22vw, 7.25rem) clamp(1.25rem, 6vw, 2rem) clamp(3.5rem, 14vw, 5rem);
+    box-sizing: border-box;
+}
+
+.fantasy-frame__header {
+    position: absolute;
+    top: clamp(0.55rem, 12vw, 7.25rem);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(58%, 11.5rem);
+    text-align: center;
+    margin: 0;
+}
+
+.fantasy-frame__title {
+    margin: 0;
+    font-family: var(--qs-font-display);
+    font-size: clamp(0.9rem, 3.8vw, 1.15rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--qs-plaque-text);
+}
+
+.fantasy-frame__tagline {
+    margin: 0.2rem 0 0;
+    font-family: var(--qs-font-display);
+    font-size: clamp(0.42rem, 1.8vw, 0.55rem);
+    line-height: 1.2;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--qs-plaque-text-muted);
+}
+
+.fantasy-frame__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.fantasy-frame__footer {
+    margin-top: auto;
+    padding-top: clamp(0.75rem, 3vw, 1.25rem);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.fantasy-frame__footer-icon {
+    flex-shrink: 0;
+    font-size: 1.75rem;
+    color: var(--qs-gold);
+    margin-top: 0.1rem;
+}
+
+.fantasy-frame__footer-text {
+    margin: 0;
+    font-family: var(--qs-font-body);
+    font-size: clamp(0.72rem, 2.8vw, 0.82rem);
+    line-height: 1.45;
+    color: var(--qs-text-muted);
+}

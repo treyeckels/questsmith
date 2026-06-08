@@ -16,6 +16,10 @@ export async function signOut() {
     return auth.signOut();
 }
 
+export async function sendPasswordReset(email: string) {
+    return auth.sendPasswordResetEmail(email);
+}
+
 export async function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
