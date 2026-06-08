@@ -1,11 +1,27 @@
 .auth-page {
     --ion-background-color: var(--qs-green);
+    background: var(--qs-auth-bg);
+}
+
+.auth-page__header {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.auth-page__header::after {
+    display: none;
 }
 
 .auth-page__header ion-toolbar {
-    --background: var(--qs-auth-bg);
+    --background: transparent;
     --color: var(--qs-text);
+    --border-width: 0 0 1px 0;
     --border-color: var(--qs-gold);
+    --border-style: solid;
+    --padding-top: max(env(safe-area-inset-top), 0.75rem);
+    --padding-bottom: 0.75rem;
+    --padding-start: 1rem;
+    --padding-end: 1rem;
+    --min-height: 3.5rem;
 }
 
 .auth-page__header ion-title {
@@ -17,21 +33,30 @@
 }
 
 .auth-page__content {
-    --background: var(--qs-auth-bg);
-    --padding-bottom: 1rem;
+    --background: transparent;
+    --padding-top: 0.5rem;
+    --padding-bottom: 1.25rem;
     --padding-start: 0.75rem;
     --padding-end: 0.75rem;
 }
 
+.auth-page__content::part(background) {
+    background: transparent;
+}
+
 .auth-page__content::part(scroll) {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: clamp(0.75rem, 3vw, 1.25rem);
+    min-height: 100%;
 }
 
 .auth-hero {
     text-align: center;
-    margin-bottom: clamp(1rem, 4vw, 1.5rem);
+    margin-top: clamp(0.75rem, 3vw, 1.25rem);
+    margin-bottom: clamp(1.25rem, 4vw, 1.75rem);
 }
 
 .auth-hero__icon {
