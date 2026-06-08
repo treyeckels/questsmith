@@ -186,8 +186,13 @@
 .auth-actions {
     display: flex;
     flex-direction: column;
-    gap: clamp(0.75rem, 3vw, 1rem);
+    gap: clamp(0.85rem, 3vw, 1.15rem);
     margin-top: 0.25rem;
+    margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
+}
+
+.auth-actions .fantasy-button--google {
+    margin-top: clamp(0.15rem, 1vw, 0.35rem);
 }
 
 .auth-divider {
