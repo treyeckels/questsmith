@@ -9,45 +9,6 @@ interface GenerateCampaignApiResult {
 
 const CAMPAIGN_API_PATH = '/api/generateCampaign';
 
-export async function requestCampaignGeneration(
-    input: CampaignGenerationRequest,
-): Promise<CampaignGenerationResponse> {
-    const user = auth.currentUser;
-    if (!user) {
-        throw new Error('You must be signed in to generate a campaign.');
-    }
-
-    const idToken = await user.getIdToken();
-    const response = await fetch(CAMPAIGN_API_PATH, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify(input),
-    });
-
-    let payload: GenerateCampaignApiResult = {};
-    try {
-        payload = await response.json() as GenerateCampaignApiResult;
-    } catch {
-        // Non-JSON error body
-    }
-
-    if (!response.ok) {
-        throw new Error(
-            payload.error
-            || `Campaign generation failed (${response.status}). Redeploy hosting and functions, then try again.`,
-        );
-    }
-
-    if (!payload.campaign) {
-        throw new Error('Campaign generation returned an empty response.');
-    }
-
-    return validateCampaignGenerationResponse(payload.campaign);
-}
-
 interface GenerateSceneApiResult {
     scene?: SceneGenerationResponse;
     error?: string;
@@ -58,6 +19,7 @@ const SCENE_API_PATH = '/api/generateScene';
 async function postGeminiApi<TPayload extends object, TResult>(
     path: string,
     body: TPayload,
+    apiName = 'Story generation',
 ): Promise<TResult> {
     const user = auth.currentUser;
     if (!user) {
@@ -77,7 +39,7 @@ async function postGeminiApi<TPayload extends object, TResult>(
     const contentType = response.headers.get('content-type') ?? '';
     if (contentType.includes('text/html')) {
         throw new Error(
-            'Story API returned the app page instead of JSON. Redeploy functions and hosting together.',
+            `${apiName} API returned the app page instead of JSON. Redeploy functions and hosting together.`,
         );
     }
 
@@ -89,11 +51,27 @@ async function postGeminiApi<TPayload extends object, TResult>(
     }
 
     if (!response.ok) {
-        const fallback = `Story generation failed (HTTP ${response.status}).`;
+        const fallback = `${apiName} failed (HTTP ${response.status}).`;
         throw new Error(payload.error?.trim() || fallback);
     }
 
     return payload as TResult;
+}
+
+export async function requestCampaignGeneration(
+    input: CampaignGenerationRequest,
+): Promise<CampaignGenerationResponse> {
+    const payload = await postGeminiApi<CampaignGenerationRequest, GenerateCampaignApiResult>(
+        CAMPAIGN_API_PATH,
+        input,
+        'Campaign generation',
+    );
+
+    if (!payload.campaign) {
+        throw new Error('Campaign generation returned an empty response.');
+    }
+
+    return validateCampaignGenerationResponse(payload.campaign);
 }
 
 export async function requestSceneGeneration(

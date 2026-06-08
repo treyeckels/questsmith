@@ -157,64 +157,66 @@ const CampaignPreview: React.FC<{ campaign: Campaign; onContinue: () => void }> 
 
     return (
         <section className="campaign-preview">
-            <header className="campaign-preview__header">
-                <IonIcon className="campaign-preview__icon" icon={sparklesOutline} aria-hidden="true" />
-                <h1 className="campaign-preview__title">{campaign.title}</h1>
-                <p className="campaign-preview__hook">{campaign.mainQuestHook}</p>
-            </header>
+            <div className="campaign-preview__parchment">
+                <header className="campaign-preview__header">
+                    <IonIcon className="campaign-preview__icon" icon={sparklesOutline} aria-hidden="true" />
+                    <h1 className="campaign-preview__title">{campaign.title}</h1>
+                    <p className="campaign-preview__hook">{campaign.mainQuestHook}</p>
+                </header>
 
-            <div className="campaign-preview__section">
-                <h2>Current Objective</h2>
-                <p>{campaign.currentObjective}</p>
-            </div>
+                <div className="campaign-preview__section">
+                    <h2>Current Objective</h2>
+                    <p>{campaign.currentObjective}</p>
+                </div>
 
-            <div className="campaign-preview__section">
-                <h2>
-                    <IonIcon icon={mapOutline} aria-hidden="true" />
-                    Starting Location
-                </h2>
-                <p className="campaign-preview__highlight">
-                    {startingLocation?.name ?? campaign.currentLocationId}
-                </p>
-                {startingLocation?.description && (
-                    <p className="campaign-preview__muted">{startingLocation.description}</p>
-                )}
-            </div>
+                <div className="campaign-preview__section">
+                    <h2>
+                        <IonIcon icon={mapOutline} aria-hidden="true" />
+                        Starting Location
+                    </h2>
+                    <p className="campaign-preview__highlight">
+                        {startingLocation?.name ?? campaign.currentLocationId}
+                    </p>
+                    {startingLocation?.description && (
+                        <p className="campaign-preview__muted">{startingLocation.description}</p>
+                    )}
+                </div>
 
-            <div className="campaign-preview__section">
-                <h2>
-                    <IonIcon icon={peopleOutline} aria-hidden="true" />
-                    Notable NPCs
-                </h2>
-                <ul className="campaign-preview__list">
-                    {campaign.npcs.slice(0, 5).map((npc) => (
-                        <li key={npc.id}>
-                            <strong>{npc.name}</strong> — {npc.role}
-                            <span>{npc.description}</span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
+                <div className="campaign-preview__section">
+                    <h2>
+                        <IonIcon icon={peopleOutline} aria-hidden="true" />
+                        Notable NPCs
+                    </h2>
+                    <ul className="campaign-preview__list">
+                        {campaign.npcs.slice(0, 5).map((npc) => (
+                            <li key={npc.id}>
+                                <strong>{npc.name}</strong> — {npc.role}
+                                <span>{npc.description}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
 
-            <div className="campaign-preview__section">
-                <h2>
-                    <IonIcon icon={mapOutline} aria-hidden="true" />
-                    Known Locations ({campaign.locations.length})
-                </h2>
-                <ul className="campaign-preview__list campaign-preview__list--compact">
-                    {campaign.locations.map((location) => (
-                        <li key={location.id}>
-                            <strong>{location.name}</strong>
-                            {location.unlocked && <em> (starting area)</em>}
-                        </li>
-                    ))}
-                </ul>
-            </div>
+                <div className="campaign-preview__section">
+                    <h2>
+                        <IonIcon icon={mapOutline} aria-hidden="true" />
+                        Known Locations ({campaign.locations.length})
+                    </h2>
+                    <ul className="campaign-preview__list campaign-preview__list--compact">
+                        {campaign.locations.map((location) => (
+                            <li key={location.id}>
+                                <strong>{location.name}</strong>
+                                {location.unlocked && <em> (starting area)</em>}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
 
-            <div className="campaign-preview__actions">
-                <FantasyButton variant="primary" onClick={onContinue}>
-                    Continue to Adventure
-                </FantasyButton>
+                <div className="campaign-preview__actions">
+                    <FantasyButton variant="primary" onClick={onContinue}>
+                        Continue to Adventure
+                    </FantasyButton>
+                </div>
             </div>
         </section>
     );
