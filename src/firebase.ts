@@ -7,13 +7,13 @@ import 'firebase/compat/storage';
 import { Capacitor } from '@capacitor/core';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBrTZJzh6kqjDuTdEwDX3qbJPJdF0QKM1c",
-    authDomain: "quest-smith-2a276.firebaseapp.com",
-    projectId: "quest-smith-2a276",
-    storageBucket: "quest-smith-2a276.firebasestorage.app",
-    messagingSenderId: "328488501565",
-    appId: "1:328488501565:web:8fef585bc74cff8c828554",
-    measurementId: "G-Q3MGN09RKZ"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 if (!firebase.apps.length) {
