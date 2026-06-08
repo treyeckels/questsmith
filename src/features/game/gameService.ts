@@ -123,9 +123,13 @@ export async function createGameWithCharacter(
     return createCharacterGame(userId, input);
 }
 
+function stripUndefined<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value)) as T;
+}
+
 export async function updateCurrentScene(gameId: string, scene: Scene): Promise<void> {
     await db.collection(COLLECTIONS.games).doc(gameId).update({
-        currentScene: scene,
+        currentScene: stripUndefined(scene),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
 }
@@ -138,7 +142,7 @@ export async function saveTurnRecord(
         .collection('turns')
         .doc(`turn-${turn.turnNumber}`)
         .set({
-            ...turn,
+            ...stripUndefined(turn),
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
 }

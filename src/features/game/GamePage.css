@@ -225,7 +225,7 @@
 }
 
 .game-page__choices .fantasy-button {
-    --color: var(--qs-plaque-text);
+    --color: var(--qs-text);
 }
 
 .game-page__scene-loading,

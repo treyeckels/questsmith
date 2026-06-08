@@ -55,12 +55,19 @@ export function mapGeminiResponseToScene(
     turnNumber: number,
     locationId: string,
 ): Scene {
-    const choices: SceneChoice[] = response.choices.map((choice, index) => ({
-        id: uniqueId('choice', choice.label, index),
-        label: choice.label,
-        intent: choice.intent,
-        riskLevel: choice.riskLevel,
-    }));
+    const choices: SceneChoice[] = response.choices.map((choice, index) => {
+        const mapped: SceneChoice = {
+            id: uniqueId('choice', choice.label, index),
+            label: choice.label,
+            intent: choice.intent,
+        };
+
+        if (choice.riskLevel) {
+            mapped.riskLevel = choice.riskLevel;
+        }
+
+        return mapped;
+    });
 
     return {
         id: `scene-${turnNumber}-${Date.now()}`,
