@@ -22,3 +22,40 @@ export interface CampaignGenerationResponse {
     npcs: CampaignGenerationNpcResponse[];
     locations: CampaignGenerationLocationResponse[];
 }
+
+export interface SceneGenerationCharacterContext {
+    name: string;
+    class: string;
+    level: number;
+    hp: number;
+    maxHp: number;
+}
+
+export interface SceneGenerationNpcContext {
+    name: string;
+    role: string;
+}
+
+export interface SceneGenerationRequest {
+    campaignTitle: string;
+    mainQuestHook: string;
+    currentLocation: string;
+    currentLocationDescription: string;
+    currentObjective: string;
+    character: SceneGenerationCharacterContext;
+    selectedChoice: string | null;
+    recentHistory: string[];
+    npcs: SceneGenerationNpcContext[];
+    isOpeningScene: boolean;
+}
+
+export interface SceneGenerationChoiceResponse {
+    label: string;
+    intent: string;
+    riskLevel?: 'low' | 'medium' | 'high';
+}
+
+export interface SceneGenerationResponse {
+    narrative: string;
+    choices: SceneGenerationChoiceResponse[];
+}

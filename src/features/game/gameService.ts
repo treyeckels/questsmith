@@ -1,15 +1,29 @@
+import firebase from 'firebase/compat/app';
 import { db } from '../../firebase';
 import { COLLECTIONS } from '../../shared/firebase/firestorePaths';
-import type { Character } from '../character/characterTypes';
-import type { CharacterCreationInput } from '../character/characterTypes';
 import { createCharacterGame } from '../character/characterService';
-import type { GameDocument, GameSummary } from './gameTypes';
+import type { Character, CharacterCreationInput } from '../character/characterTypes';
+import type { ActiveGame, GameDocument, GameSummary, Scene, TurnDocument } from './gameTypes';
 
 function mapGameDoc(id: string, data: GameDocument): GameSummary {
     return {
         id,
         character: data.character,
         campaign: data.campaign ?? null,
+        status: data.status,
+    };
+}
+
+function mapActiveGameDoc(id: string, data: GameDocument): ActiveGame | null {
+    if (!data.campaign) {
+        return null;
+    }
+
+    return {
+        id,
+        character: data.character,
+        campaign: data.campaign,
+        currentScene: data.currentScene ?? null,
         status: data.status,
     };
 }
@@ -59,6 +73,31 @@ export async function getActiveGame(userId: string): Promise<GameSummary | null>
     }
 }
 
+export async function getActiveGameForPlay(userId: string): Promise<ActiveGame | null> {
+    try {
+        const snapshot = await db
+            .collection(COLLECTIONS.games)
+            .where('userId', '==', userId)
+            .where('status', '==', 'active')
+            .limit(1)
+            .get();
+
+        if (snapshot.empty) {
+            return null;
+        }
+
+        const doc = snapshot.docs[0];
+        return mapActiveGameDoc(doc.id, doc.data() as GameDocument);
+    } catch (error) {
+        const code = (error as { code?: string })?.code;
+        if (code === 'permission-denied') {
+            console.warn('Unable to load saved game.', error);
+            return null;
+        }
+        throw error;
+    }
+}
+
 export function gameNeedsCampaignGeneration(game: GameSummary): boolean {
     return !game.campaign;
 }
@@ -82,6 +121,39 @@ export async function createGameWithCharacter(
     input: CharacterCreationInput,
 ): Promise<string> {
     return createCharacterGame(userId, input);
+}
+
+export async function updateCurrentScene(gameId: string, scene: Scene): Promise<void> {
+    await db.collection(COLLECTIONS.games).doc(gameId).update({
+        currentScene: scene,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+}
+
+export async function saveTurnRecord(
+    gameId: string,
+    turn: Omit<TurnDocument, 'createdAt'>,
+): Promise<void> {
+    await db.collection(COLLECTIONS.games).doc(gameId)
+        .collection('turns')
+        .doc(`turn-${turn.turnNumber}`)
+        .set({
+            ...turn,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+}
+
+export async function getRecentTurnSummaries(gameId: string, limit: number): Promise<string[]> {
+    const snapshot = await db.collection(COLLECTIONS.games).doc(gameId)
+        .collection('turns')
+        .orderBy('turnNumber', 'desc')
+        .limit(limit)
+        .get();
+
+    return snapshot.docs
+        .map((doc) => (doc.data() as TurnDocument).sceneSummary)
+        .filter(Boolean)
+        .reverse();
 }
 
 export type { Character };

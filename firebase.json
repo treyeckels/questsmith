@@ -55,7 +55,14 @@
       {
         "source": "/api/generateCampaign",
         "function": {
-          "functionId": "generateCampaign",
+          "functionId": "generateCampaignApi",
+          "region": "us-central1"
+        }
+      },
+      {
+        "source": "/api/generateScene",
+        "function": {
+          "functionId": "generateScene",
           "region": "us-central1"
         }
       },

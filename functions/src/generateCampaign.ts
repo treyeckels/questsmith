@@ -55,7 +55,7 @@ function setCorsHeaders(res: { set: (key: string, value: string) => void }) {
     res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 }
 
-export const generateCampaign = onRequest(
+export const generateCampaignApi = onRequest(
     {
         secrets: [geminiApiKey],
         cors: true,

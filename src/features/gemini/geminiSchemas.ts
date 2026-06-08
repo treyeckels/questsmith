@@ -1,4 +1,4 @@
-import type { CampaignGenerationResponse } from './geminiTypes';
+import type { CampaignGenerationResponse, SceneGenerationResponse } from './geminiTypes';
 
 function isNonEmptyString(value: unknown): value is string {
     return typeof value === 'string' && value.trim().length > 0;
@@ -83,4 +83,52 @@ export function parseCampaignGenerationJson(raw: string): CampaignGenerationResp
     }
 
     return validateCampaignGenerationResponse(parsed);
+}
+
+function isRiskLevel(value: unknown): value is 'low' | 'medium' | 'high' {
+    return value === 'low' || value === 'medium' || value === 'high';
+}
+
+function isSceneChoice(value: unknown): boolean {
+    if (!value || typeof value !== 'object') {
+        return false;
+    }
+    const choice = value as Record<string, unknown>;
+    return isNonEmptyString(choice.label) && isNonEmptyString(choice.intent)
+        && (choice.riskLevel === undefined || isRiskLevel(choice.riskLevel));
+}
+
+export function validateSceneGenerationResponse(data: unknown): SceneGenerationResponse {
+    if (!data || typeof data !== 'object') {
+        throw new Error('Scene response was not a valid object.');
+    }
+
+    const response = data as Record<string, unknown>;
+
+    if (!isNonEmptyString(response.narrative)) {
+        throw new Error('Scene response is missing narrative text.');
+    }
+
+    if (!Array.isArray(response.choices) || response.choices.length < 2 || response.choices.length > 4) {
+        throw new Error('Scene response must include 2-4 choices.');
+    }
+
+    if (!response.choices.every(isSceneChoice)) {
+        throw new Error('Scene response contains invalid choices.');
+    }
+
+    return {
+        narrative: response.narrative.trim(),
+        choices: response.choices.map((choice) => {
+            const entry = choice as Record<string, unknown>;
+            const mapped: SceneGenerationResponse['choices'][number] = {
+                label: String(entry.label).trim(),
+                intent: String(entry.intent).trim(),
+            };
+            if (isRiskLevel(entry.riskLevel)) {
+                mapped.riskLevel = entry.riskLevel;
+            }
+            return mapped;
+        }),
+    };
 }

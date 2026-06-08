@@ -1,9 +1,9 @@
 import {
-    IonButton,
     IonContent,
     IonHeader,
     IonIcon,
     IonPage,
+    IonSpinner,
     IonText,
     IonTitle,
     IonToolbar,
@@ -12,18 +12,19 @@ import {
     cashOutline,
     flashOutline,
     heartOutline,
+    mapOutline,
     shieldOutline,
     sparklesOutline,
     trendingUpOutline,
 } from 'ionicons/icons';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { getClassDefinition, getPortraitDefinition, HEROES_SPRITE_URL } from '../character/characterConfig';
-import type { Character } from '../character/characterTypes';
 import { signOut } from '../auth/authService';
-import type { Campaign } from '../campaign/campaignTypes';
-import { gameNeedsCampaignGeneration, getActiveGame } from './gameService';
+import { getClassDefinition, getPortraitDefinition, HEROES_SPRITE_URL } from '../character/characterConfig';
+import FantasyButton from '../../shared/components/FantasyButton';
 import { useAuth } from '../../shared/hooks/useAuth';
+import { useGameplay } from '../../shared/hooks/useGameplay';
+import { gameNeedsCampaignGeneration } from './gameService';
 import './GamePage.css';
 
 const formatModifier = (value: number) => (value >= 0 ? `+${value}` : `${value}`);
@@ -31,55 +32,40 @@ const formatModifier = (value: number) => (value >= 0 ? `+${value}` : `${value}`
 const GamePage: React.FC = () => {
     const history = useHistory();
     const { user } = useAuth();
-    const [character, setCharacter] = useState<Character | null>(null);
-    const [campaign, setCampaign] = useState<Campaign | null>(null);
-    const [loading, setLoading] = useState(true);
+    const {
+        game,
+        error,
+        selectChoice,
+        retry,
+        isLoading,
+        isBusy,
+        isError,
+    } = useGameplay(user?.uid);
 
     useEffect(() => {
-        if (!user?.uid) {
+        if (isLoading) {
             return;
         }
 
-        let cancelled = false;
+        if (!game) {
+            history.replace('/character/create');
+            return;
+        }
 
-        getActiveGame(user.uid)
-            .then((game) => {
-                if (cancelled) {
-                    return;
-                }
-
-                if (!game) {
-                    history.replace('/character/create');
-                    return;
-                }
-
-                if (gameNeedsCampaignGeneration(game)) {
-                    history.replace('/campaign/generate');
-                    return;
-                }
-
-                setCharacter(game.character);
-                setCampaign(game.campaign);
-            })
-            .finally(() => {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            });
-
-        return () => {
-            cancelled = true;
-        };
-    }, [user?.uid, history]);
+        if (gameNeedsCampaignGeneration(game)) {
+            history.replace('/campaign/generate');
+        }
+    }, [game, history, isLoading]);
 
     const handleSignOut = async () => {
         await signOut();
     };
 
-    if (loading || !character) {
+    if (isLoading || !game) {
         return (
             <IonPage className="game-page">
-                <IonContent className="game-page__content ion-padding">
+                <IonContent className="game-page__content ion-padding ion-text-center">
+                    <IonSpinner name="crescent" className="game-page__spinner" />
                     <IonText>
                         <p>Loading your adventure...</p>
                     </IonText>
@@ -88,62 +74,130 @@ const GamePage: React.FC = () => {
         );
     }
 
+    const character = game.character;
+    const campaign = game.campaign;
     const classDefinition = getClassDefinition(character.class);
     const portrait = getPortraitDefinition(character.portraitId);
+    const currentLocation = campaign.locations.find(
+        (location) => location.id === campaign.currentLocationId,
+    );
+    const scene = game.currentScene;
 
     return (
         <IonPage className="game-page">
             <IonHeader className="game-page__header">
                 <IonToolbar>
-                    <IonTitle>Your Adventure</IonTitle>
+                    <IonTitle>{campaign.title}</IonTitle>
                 </IonToolbar>
             </IonHeader>
-            <IonContent className="game-page__content ion-padding">
-                <section className="game-page__hero-card">
-                    <div className="game-page__portrait-wrap">
-                        <span
-                            className="game-page__portrait"
-                            style={{
-                                backgroundImage: `url(${HEROES_SPRITE_URL})`,
-                                backgroundPosition: portrait?.spritePosition ?? 'center',
-                            }}
-                            aria-hidden="true"
-                        />
-                    </div>
-                    <div className="game-page__hero-details">
-                        <h2>{character.name}</h2>
-                        <p>Level {character.level} {classDefinition.label}</p>
-                    </div>
-                </section>
+            <IonContent className="game-page__content">
+                <div className="game-page__layout">
+                    <section className="game-page__meta">
+                        <div className="game-page__hero-card">
+                            <div className="game-page__portrait-wrap">
+                                <span
+                                    className="game-page__portrait"
+                                    style={{
+                                        backgroundImage: `url(${HEROES_SPRITE_URL})`,
+                                        backgroundPosition: portrait?.spritePosition ?? 'center',
+                                    }}
+                                    aria-hidden="true"
+                                />
+                            </div>
+                            <div className="game-page__hero-details">
+                                <h2>{character.name}</h2>
+                                <p>Level {character.level} {classDefinition.label}</p>
+                            </div>
+                        </div>
 
-                <ul className="game-page__stats">
-                    <li><IonIcon icon={heartOutline} aria-hidden="true" /><span>HP</span><strong>{character.hp}</strong></li>
-                    <li><IonIcon icon={trendingUpOutline} aria-hidden="true" /><span>Attack</span><strong>{formatModifier(character.stats.attackModifier)}</strong></li>
-                    <li><IonIcon icon={shieldOutline} aria-hidden="true" /><span>Defense</span><strong>{formatModifier(character.stats.defenseModifier)}</strong></li>
-                    <li><IonIcon icon={sparklesOutline} aria-hidden="true" /><span>Magic</span><strong>{formatModifier(character.stats.magicModifier)}</strong></li>
-                    <li><IonIcon icon={flashOutline} aria-hidden="true" /><span>Agility</span><strong>{formatModifier(character.stats.agilityModifier)}</strong></li>
-                    <li><IonIcon icon={cashOutline} aria-hidden="true" /><span>Gold</span><strong>{character.gold}</strong></li>
-                </ul>
-
-                {campaign && (
-                    <section className="game-page__campaign">
-                        <h3>{campaign.title}</h3>
-                        <p className="game-page__campaign-hook">{campaign.mainQuestHook}</p>
-                        <p className="game-page__campaign-objective">
-                            <strong>Objective:</strong> {campaign.currentObjective}
-                        </p>
+                        <ul className="game-page__stats">
+                            <li><IonIcon icon={heartOutline} aria-hidden="true" /><span>HP</span><strong>{character.hp}</strong></li>
+                            <li><IonIcon icon={trendingUpOutline} aria-hidden="true" /><span>Attack</span><strong>{formatModifier(character.stats.attackModifier)}</strong></li>
+                            <li><IonIcon icon={shieldOutline} aria-hidden="true" /><span>Defense</span><strong>{formatModifier(character.stats.defenseModifier)}</strong></li>
+                            <li><IonIcon icon={sparklesOutline} aria-hidden="true" /><span>Magic</span><strong>{formatModifier(character.stats.magicModifier)}</strong></li>
+                            <li><IonIcon icon={flashOutline} aria-hidden="true" /><span>Agility</span><strong>{formatModifier(character.stats.agilityModifier)}</strong></li>
+                            <li><IonIcon icon={cashOutline} aria-hidden="true" /><span>Gold</span><strong>{character.gold}</strong></li>
+                        </ul>
                     </section>
-                )}
 
-                <IonText>
-                    <p className="game-page__placeholder">
-                        Scene gameplay and choices are coming in Epic 4. Your campaign is saved and ready.
-                    </p>
-                </IonText>
+                    <section className="game-page__story">
+                        <header className="game-page__story-header">
+                            <p className="game-page__location">
+                                <IonIcon icon={mapOutline} aria-hidden="true" />
+                                {currentLocation?.name ?? 'Unknown location'}
+                            </p>
+                            {scene && (
+                                <p className="game-page__turn">Turn {scene.turnNumber}</p>
+                            )}
+                        </header>
 
-                <IonButton expand="block" fill="outline" onClick={handleSignOut}>
-                    Sign Out
-                </IonButton>
+                        <div className="game-page__parchment">
+                            {isBusy && !scene && (
+                                <div className="game-page__scene-loading">
+                                    <IonSpinner name="crescent" />
+                                    <p>The Dungeon Master is setting the scene...</p>
+                                </div>
+                            )}
+
+                            {!scene && isError && (
+                                <div className="game-page__scene-error" role="alert">
+                                    <p>{error ?? 'Something went wrong while generating the scene.'}</p>
+                                    <FantasyButton variant="primary" onClick={() => void retry()}>
+                                        Try Again
+                                    </FantasyButton>
+                                </div>
+                            )}
+
+                            {scene && (
+                                <>
+                                    {isError && (
+                                        <div className="game-page__scene-error" role="alert">
+                                            <p>{error ?? 'Something went wrong while generating the scene.'}</p>
+                                            <FantasyButton variant="primary" onClick={() => void retry()}>
+                                                Try Again
+                                            </FantasyButton>
+                                        </div>
+                                    )}
+
+                                    <div className="game-page__narrative">
+                                        {scene.narrative.split('\n').filter(Boolean).map((paragraph, index) => (
+                                            <p key={`${scene.id}-p-${index}`}>{paragraph.trim()}</p>
+                                        ))}
+                                    </div>
+
+                                    {!isError && (
+                                        <div className="game-page__choices">
+                                            <h3>What do you do?</h3>
+                                            {scene.choices.map((choice) => (
+                                                <FantasyButton
+                                                    key={choice.id}
+                                                    variant="secondary"
+                                                    disabled={isBusy}
+                                                    onClick={() => void selectChoice(choice.id)}
+                                                >
+                                                    {choice.label}
+                                                </FantasyButton>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            {isBusy && scene && (
+                                <div className="game-page__scene-overlay" aria-live="polite">
+                                    <IonSpinner name="crescent" />
+                                    <p>Weaving the next scene...</p>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
+                    <div className="game-page__footer">
+                        <FantasyButton variant="secondary" onClick={handleSignOut}>
+                            Sign Out
+                        </FantasyButton>
+                    </div>
+                </div>
             </IonContent>
         </IonPage>
     );
