@@ -1,6 +1,144 @@
+# QuestSmith
+
+QuestSmith is a mobile-first, single-player choose-your-own-adventure fantasy RPG. Gemini acts as the AI Dungeon Master—generating scenes, choices, dialogue, and flavor text—while the app controls deterministic game systems: HP, inventory, gold, XP, combat, quest status, and saved progress.
+
+## Hybrid AI Architecture
+
+This project separates **creative generation** from **deterministic game logic**:
+
+| Layer | Responsibility |
+|-------|----------------|
+| **Gemini** | Scene narration, player choices, NPC dialogue, item descriptions, quest ideas |
+| **App (game engine)** | Dice rolls, combat outcomes, stat changes, inventory updates, quest status, persistence |
+| **Firebase** | Authentication, Firestore persistence, Hosting, Cloud Functions |
+
+Gemini suggests narrative consequences; the app calculates and saves the actual game state. This keeps the experience dynamic while remaining fair, testable, and recoverable.
+
+## Tech Stack
+
+- **Frontend:** React 19, Ionic React, TypeScript, Vite
+- **Backend:** Firebase Auth, Firestore, Cloud Functions, Hosting
+- **AI:** Gemini API (planned via Cloud Functions)
+- **Mobile:** Capacitor (optional native builds)
+
+## Current Status
+
+| Epic | Feature | Status |
+|------|---------|--------|
+| 1 | Authentication (email/password, Google, sign-out, protected routes) | Done |
+| 2 | Character creation | Planned |
+| 3 | Random campaign generation | Planned |
+| 4+ | Gameplay loop, combat, inventory, quests, persistence | Planned |
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- A Firebase project with Auth and Firestore enabled
+- Firebase CLI (`npm install -g firebase-tools`)
+
+### Installation
+
+```bash
+git clone https://github.com/treyeckels/questsmith.git
+cd questsmith
+npm install
+npm install --prefix functions
+```
+
+### Environment Variables
+
+Copy the example env file and fill in your Firebase web app config from the [Firebase Console](https://console.firebase.google.com/) → Project Settings → Your apps:
+
+```bash
+cp .env.example .env.local
+```
+
+Required variables:
+
+```
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+VITE_FIREBASE_MEASUREMENT_ID=
+```
+
+Restart the dev server after changing env files.
+
+### Firebase Setup
+
+In the Firebase Console under **Authentication → Sign-in method**, enable:
+
+- **Email/Password**
+- **Google**
+
+Deploy Firestore rules and indexes:
+
+```bash
+firebase login
+firebase deploy --only firestore:rules,firestore:indexes
+```
+
+### Run Locally
+
+```bash
+npm run dev
+```
+
+Open the URL shown in the terminal (typically `http://localhost:5173`).
+
+### Build & Deploy
+
+```bash
+npm run build
+firebase deploy --only hosting
+```
+
+## Project Structure
+
+```
+src/
+  app/              # App routing
+  features/
+    auth/           # Sign-in, sign-up, Google OAuth
+    character/      # Character creation (stub)
+    game/           # Game screen and game queries (stub)
+  shared/
+    components/     # Route guards, loading states
+    context/        # AuthProvider
+    hooks/          # useAuth
+    firebase/       # Firestore path helpers
+  firebase.ts       # Firebase client initialization
+
+functions/          # Firebase Cloud Functions (TypeScript)
+docs/               # SRS, user stories, architecture, prompts
+```
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite dev server |
+| `npm run build` | Type-check and production build |
+| `npm run preview` | Preview production build locally |
+| `npm run test.unit` | Run Vitest unit tests |
+| `npm run test.e2e` | Run Cypress end-to-end tests |
+| `npm run lint` | Run ESLint |
+
+## Documentation
+
+- [Software Requirements Specification](docs/srs.md)
+- [User Stories & Acceptance Criteria](docs/user-stories.md)
+- [Architecture](docs/architecture.md)
+- [Gemini Prompt Strategy](docs/prompts.md)
+
 ## AI-Assisted Development Workflow
 
-This project was intentionally developed using an AI-assisted workflow.
+This project was intentionally developed using an AI-assisted workflow:
 
 1. Generate requirements (SRS)
 2. Define user stories
@@ -9,3 +147,11 @@ This project was intentionally developed using an AI-assisted workflow.
 5. Generate scaffolding
 6. Review and refine generated code
 7. Write tests and documentation
+
+## MVP Goal
+
+The MVP is complete when a user can create an account, create a character, start a randomly generated campaign, play 10–15 turns, survive basic combat, gain or lose items, and resume their game later.
+
+## License
+
+Private project.
