@@ -49,11 +49,38 @@ npm install --prefix functions
 
 ### Environment Variables
 
-Copy the example env file and fill in your Firebase web app config from the [Firebase Console](https://console.firebase.google.com/) → Project Settings → Your apps:
+Firebase config is loaded at build time through Vite `import.meta.env` in `src/firebase.ts`. Only variables prefixed with `VITE_` are exposed to the client.
+
+| File | When it is used | Committed? |
+|------|-----------------|------------|
+| `.env.example` | Template with placeholder values | Yes |
+| `.env.local` | Local development (`npm run dev`) | No — gitignored |
+| `.env.production` | Production builds (`npm run build`) before Firebase Hosting deploys | No — gitignored |
+
+**Local development**
 
 ```bash
 cp .env.example .env.local
 ```
+
+Fill in your Firebase web app config from the [Firebase Console](https://console.firebase.google.com/) → Project Settings → Your apps. Restart the dev server after changing env files.
+
+**Production deploys**
+
+Before building for Firebase Hosting, create a production env file with the same variables:
+
+```bash
+cp .env.example .env.production
+```
+
+Vite loads `.env.production` automatically when you run `npm run build`. Then deploy:
+
+```bash
+npm run build
+firebase deploy --only hosting
+```
+
+**Important:** Never commit `.env.local`, `.env.production`, or any file containing real Firebase credentials. Only `.env.example` (placeholders) belongs in the repo.
 
 Required variables:
 
@@ -66,8 +93,6 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
 VITE_FIREBASE_MEASUREMENT_ID=
 ```
-
-Restart the dev server after changing env files.
 
 ### Firebase Setup
 
@@ -92,6 +117,8 @@ npm run dev
 Open the URL shown in the terminal (typically `http://localhost:5173`).
 
 ### Build & Deploy
+
+Ensure `.env.production` exists with your Firebase config (see [Environment Variables](#environment-variables)), then:
 
 ```bash
 npm run build
