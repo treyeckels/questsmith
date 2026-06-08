@@ -1,0 +1,19 @@
+:root {
+    --qs-bg-charcoal: #1a1a1e;
+    --qs-bg-panel: #121216;
+    --qs-gold: #c9a45c;
+    --qs-gold-light: #e2c78a;
+    --qs-bronze: #8b6914;
+    --qs-green: #1f4d2c;
+    --qs-green-light: #2a6340;
+    --qs-blue: #1a3a5c;
+    --qs-blue-light: #234d75;
+    --qs-text: #f5eedc;
+    --qs-text-muted: #b8aa94;
+    --qs-link: #6eb5ff;
+    --qs-danger: #e07a7a;
+    --qs-plaque-text: #2a2218;
+    --qs-plaque-text-muted: #4a3f30;
+    --qs-font-display: 'Cinzel', 'Times New Roman', serif;
+    --qs-font-body: 'Cinzel', Georgia, serif;
+}

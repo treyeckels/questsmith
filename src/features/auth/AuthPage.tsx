@@ -1,37 +1,34 @@
+import { IonContent, IonIcon, IonInput, IonPage, IonText } from '@ionic/react';
 import {
-    IonButton,
-    IonContent,
-    IonHeader,
-    IonInput,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonPage,
-    IonSegment,
-    IonSegmentButton,
-    IonText,
-    IonTitle,
-    IonToolbar,
-} from '@ionic/react';
+    eyeOffOutline,
+    eyeOutline,
+    lockClosedOutline,
+    mailOutline,
+    personOutline,
+} from 'ionicons/icons';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import FantasyButton from '../../shared/components/FantasyButton';
+import FantasyFrame from '../../shared/components/FantasyFrame';
+import { getPostAuthPath } from '../game/gameService';
+import { getAuthErrorMessage } from './authErrors';
 import {
     handleGoogleRedirectResult,
+    sendPasswordReset,
     signIn,
     signInWithGoogle,
     signUp,
 } from './authService';
-import { getAuthErrorMessage } from './authErrors';
-import { AuthMode } from './authTypes';
-import { getPostAuthPath } from '../game/gameService';
 import './AuthPage.css';
+
+type StatusMessage = { type: 'error' | 'success'; text: string } | null;
 
 const AuthPage: React.FC = () => {
     const history = useHistory();
-    const [mode, setMode] = useState<AuthMode>('signIn');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [statusMessage, setStatusMessage] = useState<StatusMessage>(null);
     const [submitting, setSubmitting] = useState(false);
 
     const redirectAfterAuth = async (userId: string) => {
@@ -51,7 +48,7 @@ const AuthPage: React.FC = () => {
             })
             .catch((error) => {
                 if (!cancelled) {
-                    setErrorMessage(getAuthErrorMessage(error));
+                    setStatusMessage({ type: 'error', text: getAuthErrorMessage(error) });
                 }
             });
 
@@ -60,44 +57,94 @@ const AuthPage: React.FC = () => {
         };
     }, [history]);
 
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
-        setErrorMessage(null);
-
+    const validateCredentials = (): string | null => {
         const trimmedEmail = email.trim();
         if (!trimmedEmail || !password) {
-            setErrorMessage('Please enter both email and password.');
-            return;
+            return 'Please enter both email and password.';
         }
-
         if (password.length < 6) {
-            setErrorMessage('Password must be at least 6 characters.');
+            return 'Password must be at least 6 characters.';
+        }
+        return null;
+    };
+
+    const handleSignIn = async (event: React.FormEvent) => {
+        event.preventDefault();
+        setStatusMessage(null);
+
+        const validationError = validateCredentials();
+        if (validationError) {
+            setStatusMessage({ type: 'error', text: validationError });
             return;
         }
 
         setSubmitting(true);
 
         try {
-            const credentials = { email: trimmedEmail, password };
-            const result = mode === 'signUp'
-                ? await signUp(credentials)
-                : await signIn(credentials);
-
+            const result = await signIn({ email: email.trim(), password });
             const userId = result.user?.uid;
             if (!userId) {
                 throw new Error('Authentication succeeded without a user.');
             }
-
             await redirectAfterAuth(userId);
         } catch (error) {
-            setErrorMessage(getAuthErrorMessage(error));
+            setStatusMessage({ type: 'error', text: getAuthErrorMessage(error) });
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleCreateAccount = async () => {
+        setStatusMessage(null);
+
+        const validationError = validateCredentials();
+        if (validationError) {
+            setStatusMessage({ type: 'error', text: validationError });
+            return;
+        }
+
+        setSubmitting(true);
+
+        try {
+            const result = await signUp({ email: email.trim(), password });
+            const userId = result.user?.uid;
+            if (!userId) {
+                throw new Error('Authentication succeeded without a user.');
+            }
+            await redirectAfterAuth(userId);
+        } catch (error) {
+            setStatusMessage({ type: 'error', text: getAuthErrorMessage(error) });
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleForgotPassword = async () => {
+        setStatusMessage(null);
+
+        const trimmedEmail = email.trim();
+        if (!trimmedEmail) {
+            setStatusMessage({ type: 'error', text: 'Enter your email address to reset your password.' });
+            return;
+        }
+
+        setSubmitting(true);
+
+        try {
+            await sendPasswordReset(trimmedEmail);
+            setStatusMessage({
+                type: 'success',
+                text: 'Password reset email sent. Check your inbox.',
+            });
+        } catch (error) {
+            setStatusMessage({ type: 'error', text: getAuthErrorMessage(error) });
         } finally {
             setSubmitting(false);
         }
     };
 
     const handleGoogleSignIn = async () => {
-        setErrorMessage(null);
+        setStatusMessage(null);
         setSubmitting(true);
 
         try {
@@ -113,101 +160,120 @@ const AuthPage: React.FC = () => {
 
             await redirectAfterAuth(userId);
         } catch (error) {
-            setErrorMessage(getAuthErrorMessage(error));
+            setStatusMessage({ type: 'error', text: getAuthErrorMessage(error) });
         } finally {
             setSubmitting(false);
         }
     };
 
     return (
-        <IonPage>
-            <IonHeader>
-                <IonToolbar color="primary">
-                    <IonTitle>QuestSmith</IonTitle>
-                </IonToolbar>
-            </IonHeader>
-            <IonContent className="ion-padding auth-page">
-                <div className="auth-page__intro">
-                    <IonText>
-                        <h1>Begin Your Adventure</h1>
-                        <p>Sign in or create an account to save your campaign progress.</p>
-                    </IonText>
-                </div>
+        <IonPage className="auth-page">
+            <IonContent fullscreen className="auth-page__content">
+                <FantasyFrame>
+                    <section className="auth-hero">
+                        <IonIcon
+                            className="auth-hero__icon"
+                            icon={lockClosedOutline}
+                            aria-hidden="true"
+                        />
+                        <h1 className="auth-hero__title">Welcome, Adventurer</h1>
+                        <div className="auth-hero__diamond" aria-hidden="true">◆</div>
+                        <p className="auth-hero__subtitle">Sign in to continue your journey.</p>
+                    </section>
 
-                <IonSegment
-                    value={mode}
-                    onIonChange={(event) => {
-                        setMode(event.detail.value as AuthMode);
-                        setErrorMessage(null);
-                    }}
-                >
-                    <IonSegmentButton value="signIn">
-                        <IonLabel>Sign In</IonLabel>
-                    </IonSegmentButton>
-                    <IonSegmentButton value="signUp">
-                        <IonLabel>Sign Up</IonLabel>
-                    </IonSegmentButton>
-                </IonSegment>
+                    <form className="auth-form" onSubmit={handleSignIn}>
+                        <div className="auth-field">
+                            <label className="auth-field__label" htmlFor="auth-email">Email</label>
+                            <div className="auth-field__control">
+                                <IonIcon className="auth-field__icon" icon={mailOutline} aria-hidden="true" />
+                                <IonInput
+                                    id="auth-email"
+                                    className="auth-field__input"
+                                    type="email"
+                                    autocomplete="email"
+                                    placeholder="Enter your email"
+                                    value={email}
+                                    onIonInput={(event) => setEmail(event.detail.value ?? '')}
+                                    required
+                                />
+                            </div>
+                        </div>
 
-                <form onSubmit={handleSubmit}>
-                    <IonList inset>
-                        <IonItem>
-                            <IonInput
-                                label="Email"
-                                labelPlacement="stacked"
-                                type="email"
-                                autocomplete="email"
-                                value={email}
-                                onIonInput={(event) => setEmail(event.detail.value ?? '')}
-                                required
-                            />
-                        </IonItem>
-                        <IonItem>
-                            <IonInput
-                                label="Password"
-                                labelPlacement="stacked"
-                                type="password"
-                                autocomplete={mode === 'signUp' ? 'new-password' : 'current-password'}
-                                value={password}
-                                onIonInput={(event) => setPassword(event.detail.value ?? '')}
-                                required
-                            />
-                        </IonItem>
-                    </IonList>
+                        <div className="auth-field">
+                            <label className="auth-field__label" htmlFor="auth-password">Password</label>
+                            <div className="auth-field__control">
+                                <IonIcon className="auth-field__icon" icon={lockClosedOutline} aria-hidden="true" />
+                                <IonInput
+                                    id="auth-password"
+                                    className="auth-field__input"
+                                    type={showPassword ? 'text' : 'password'}
+                                    autocomplete="current-password"
+                                    placeholder="Enter your password"
+                                    value={password}
+                                    onIonInput={(event) => setPassword(event.detail.value ?? '')}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    className="auth-field__toggle"
+                                    onClick={() => setShowPassword((current) => !current)}
+                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                >
+                                    <IonIcon icon={showPassword ? eyeOffOutline : eyeOutline} />
+                                </button>
+                            </div>
+                        </div>
 
-                    {errorMessage && (
-                        <IonText color="danger" className="auth-page__error">
-                            <p role="alert">{errorMessage}</p>
-                        </IonText>
-                    )}
+                        <button
+                            type="button"
+                            className="auth-forgot"
+                            onClick={handleForgotPassword}
+                            disabled={submitting}
+                        >
+                            Forgot Password?
+                        </button>
 
-                    <IonButton
-                        expand="block"
-                        type="submit"
-                        className="auth-page__submit"
-                        disabled={submitting}
-                    >
-                        {submitting
-                            ? 'Please wait...'
-                            : mode === 'signUp'
-                                ? 'Create Account'
-                                : 'Sign In'}
-                    </IonButton>
-                </form>
+                        {statusMessage && (
+                            <IonText>
+                                <p
+                                    role="alert"
+                                    className={`auth-message auth-message--${statusMessage.type}`}
+                                >
+                                    {statusMessage.text}
+                                </p>
+                            </IonText>
+                        )}
 
-                <div className="auth-page__divider">
-                    <span>or</span>
-                </div>
+                        <div className="auth-actions">
+                            <FantasyButton
+                                type="submit"
+                                variant="primary"
+                                disabled={submitting}
+                            >
+                                {submitting ? 'Please wait...' : 'Sign In'}
+                            </FantasyButton>
 
-                <IonButton
-                    expand="block"
-                    fill="outline"
-                    className="auth-page__google"
-                    disabled={submitting}
-                    onClick={handleGoogleSignIn}
-                >
-                    Continue with Google
-                </IonButton>
+                            <div className="auth-divider" aria-hidden="true">OR</div>
+
+                            <FantasyButton
+                                variant="secondary"
+                                disabled={submitting}
+                                onClick={handleCreateAccount}
+                                icon={<IonIcon icon={personOutline} aria-hidden="true" />}
+                            >
+                                Create Account
+                            </FantasyButton>
+
+                            <FantasyButton
+                                variant="google"
+                                disabled={submitting}
+                                onClick={handleGoogleSignIn}
+                            >
+                                Continue with Google
+                            </FantasyButton>
+                        </div>
+                    </form>
+                </FantasyFrame>
             </IonContent>
         </IonPage>
     );
