@@ -14,6 +14,13 @@ export default defineConfig({
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
     },
+    proxy: {
+      '/api/generateCampaign': {
+        target: 'https://quest-smith-2a276.web.app',
+        changeOrigin: true,
+        secure: true,
+      },
+    },
   },
   test: {
     globals: true,

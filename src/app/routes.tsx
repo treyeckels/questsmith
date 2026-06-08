@@ -2,6 +2,7 @@ import { Route } from 'react-router-dom';
 import { IonRouterOutlet } from '@ionic/react';
 import React from 'react';
 import AuthPage from '../features/auth/AuthPage';
+import CampaignGenerationPage from '../features/campaign/CampaignGenerationPage';
 import CharacterCreationPage from '../features/character/CharacterCreationPage';
 import GamePage from '../features/game/GamePage';
 import GuestRoute from '../shared/components/GuestRoute';
@@ -18,6 +19,11 @@ const AppRoutes: React.FC = () => (
         <Route exact path="/character/create">
             <ProtectedRoute>
                 <CharacterCreationPage />
+            </ProtectedRoute>
+        </Route>
+        <Route exact path="/campaign/generate">
+            <ProtectedRoute>
+                <CampaignGenerationPage />
             </ProtectedRoute>
         </Route>
         <Route exact path="/game">
