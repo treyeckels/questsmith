@@ -14,7 +14,7 @@ After character creation, the player is routed to a temporary campaign generatio
 Character Creation → /campaign/generate → Cloud Function (Gemini) → validate → Firestore → preview → /game
 ```
 
-Gemini API key stays server-side in Cloud Functions (`GEMINI_API_KEY`). The client never holds the key.
+Gemini API key stays server-side in Cloud Functions via Firebase Secrets (`GEMINI_API_KEY` in Google Cloud Secret Manager). The client never holds the key.
 
 ---
 

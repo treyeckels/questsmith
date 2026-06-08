@@ -108,6 +108,39 @@ firebase login
 firebase deploy --only firestore:rules,firestore:indexes
 ```
 
+### Cloud Functions secrets (Gemini)
+
+Campaign generation calls Gemini from a Cloud Function. The API key is stored in **Google Cloud Secret Manager** via Firebase — never in the client app.
+
+**Production (one-time setup)**
+
+```bash
+firebase functions:secrets:set GEMINI_API_KEY
+```
+
+Enter your [Gemini API key](https://aistudio.google.com/apikey) when prompted. Then deploy functions:
+
+```bash
+cd functions && npm run build
+firebase deploy --only functions
+```
+
+**Local emulator**
+
+Create `functions/.secret.local` (gitignored):
+
+```
+GEMINI_API_KEY=your-gemini-api-key
+```
+
+Run the emulator with secrets access:
+
+```bash
+firebase emulators:start --only functions
+```
+
+Do **not** add `VITE_GEMINI_*` to the client — the key must stay server-side.
+
 ### Run Locally
 
 ```bash

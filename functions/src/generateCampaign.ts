@@ -1,5 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { defineSecret } from 'firebase-functions/params';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
+
+const geminiApiKey = defineSecret('GEMINI_API_KEY');
 
 interface CampaignGenerationRequest {
     characterName: string;
@@ -41,7 +44,9 @@ function parseJsonResponse(raw: string): unknown {
     return JSON.parse(jsonText);
 }
 
-export const generateCampaign = onCall(async (request) => {
+export const generateCampaign = onCall(
+    { secrets: [geminiApiKey] },
+    async (request) => {
     if (!request.auth) {
         throw new HttpsError('unauthenticated', 'You must be signed in to generate a campaign.');
     }
@@ -51,7 +56,7 @@ export const generateCampaign = onCall(async (request) => {
         throw new HttpsError('invalid-argument', 'Character name and class are required.');
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = geminiApiKey.value();
     if (!apiKey) {
         throw new HttpsError('failed-precondition', 'Gemini API key is not configured on the server.');
     }
@@ -85,4 +90,5 @@ export const generateCampaign = onCall(async (request) => {
         console.error('Campaign generation failed:', error);
         throw new HttpsError('internal', 'Campaign generation failed. Please try again.');
     }
-});
+    },
+);

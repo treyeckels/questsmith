@@ -13,7 +13,7 @@ function getCallableErrorMessage(error: unknown): string {
         case 'functions/unauthenticated':
             return 'You must be signed in to generate a campaign.';
         case 'functions/failed-precondition':
-            return 'Campaign generation is not configured yet. Set GEMINI_API_KEY on Cloud Functions.';
+            return 'Campaign generation is not configured yet. Run: firebase functions:secrets:set GEMINI_API_KEY';
         case 'functions/invalid-argument':
             return 'Character details were missing. Please create your hero again.';
         case 'functions/internal':
