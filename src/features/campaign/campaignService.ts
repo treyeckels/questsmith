@@ -6,6 +6,7 @@ import { CAMPAIGN_TONE } from '../gemini/geminiPrompts';
 import { requestCampaignGeneration } from '../gemini/geminiService';
 import type { CampaignGenerationResponse } from '../gemini/geminiTypes';
 import type { Campaign, CampaignGenerationInput, CampaignPhase } from './campaignTypes';
+import type { GameDocument } from '../game/gameTypes';
 import { getPhaseForTurn } from './campaignPhase';
 
 function findStartingLocationId(
@@ -104,13 +105,27 @@ export async function generateAndSaveCampaign(
 export async function startNewAdventure(
     gameId: string,
     input: CampaignGenerationInput,
+    options: { restoreHealth?: boolean } = {},
 ): Promise<Campaign> {
-    await db.collection(COLLECTIONS.games).doc(gameId).update({
+    const gameDoc = await db.collection(COLLECTIONS.games).doc(gameId).get();
+    const data = gameDoc.data() as GameDocument | undefined;
+
+    const updatePayload: Record<string, unknown> = {
         status: 'active',
         campaign: null,
         currentScene: null,
+        combatState: null,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
+    };
+
+    if (options.restoreHealth && data?.character) {
+        updatePayload.character = {
+            ...data.character,
+            hp: data.character.maxHp,
+        };
+    }
+
+    await db.collection(COLLECTIONS.games).doc(gameId).update(updatePayload);
 
     return generateAndSaveCampaign(gameId, input);
 }

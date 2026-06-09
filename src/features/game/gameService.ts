@@ -16,6 +16,7 @@ import type { Campaign } from '../campaign/campaignTypes';
 import { normalizeCampaignPhase } from '../campaign/campaignService';
 import type { InventoryItem } from '../inventory/inventoryTypes';
 import { normalizeInventory } from '../inventory/inventoryService';
+import type { CombatState } from '../combat/combatTypes';
 
 function mapGameDoc(id: string, data: GameDocument): GameSummary {
     const turnNumber = data.currentScene?.turnNumber ?? 1;
@@ -30,6 +31,8 @@ function mapGameDoc(id: string, data: GameDocument): GameSummary {
         campaignCompletion: data.campaignCompletion ?? null,
         inventory: normalizeInventory(data.inventory),
         lastItemRewardTurn: data.lastItemRewardTurn ?? null,
+        lastCombatTurn: data.lastCombatTurn ?? null,
+        combatState: data.combatState ?? null,
     };
 }
 
@@ -49,6 +52,8 @@ function mapActiveGameDoc(id: string, data: GameDocument): ActiveGame | null {
         campaignCompletion: data.campaignCompletion ?? null,
         inventory: normalizeInventory(data.inventory),
         lastItemRewardTurn: data.lastItemRewardTurn ?? null,
+        lastCombatTurn: data.lastCombatTurn ?? null,
+        combatState: data.combatState ?? null,
     };
 }
 
@@ -65,6 +70,8 @@ function mapCompletedGameDoc(id: string, data: GameDocument): CompletedGame | nu
         campaignCompletion: data.campaignCompletion,
         inventory: normalizeInventory(data.inventory),
         lastItemRewardTurn: data.lastItemRewardTurn ?? null,
+        lastCombatTurn: data.lastCombatTurn ?? null,
+        combatState: data.combatState ?? null,
     };
 }
 
@@ -173,6 +180,11 @@ export async function getLatestGame(userId: string): Promise<GameSummary | null>
         return activeGame;
     }
 
+    const defeatedGame = await getDefeatedGame(userId);
+    if (defeatedGame) {
+        return defeatedGame;
+    }
+
     const completedGame = await getCompletedGame(userId);
     if (completedGame) {
         return completedGame;
@@ -200,6 +212,31 @@ export async function getLatestGame(userId: string): Promise<GameSummary | null>
     }
 }
 
+export async function getDefeatedGame(userId: string): Promise<GameSummary | null> {
+    try {
+        const snapshot = await db
+            .collection(COLLECTIONS.games)
+            .where('userId', '==', userId)
+            .where('status', '==', 'defeated')
+            .limit(1)
+            .get();
+
+        if (snapshot.empty) {
+            return null;
+        }
+
+        const doc = snapshot.docs[0];
+        return mapGameDoc(doc.id, doc.data() as GameDocument);
+    } catch (error) {
+        const code = (error as { code?: string })?.code;
+        if (code === 'permission-denied') {
+            console.warn('Unable to load defeated game.', error);
+            return null;
+        }
+        throw error;
+    }
+}
+
 export async function getPostAuthPath(userId: string): Promise<string> {
     const activeGame = await getActiveGame(userId);
 
@@ -209,6 +246,11 @@ export async function getPostAuthPath(userId: string): Promise<string> {
         }
 
         return '/game';
+    }
+
+    const defeatedGame = await getDefeatedGame(userId);
+    if (defeatedGame) {
+        return '/campaign/defeat';
     }
 
     const completedGame = await getCompletedGame(userId);
@@ -304,6 +346,70 @@ export async function persistInventoryReward(
     await db.collection(COLLECTIONS.games).doc(gameId).update({
         inventory: stripUndefined(inventory),
         lastItemRewardTurn,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+}
+
+export async function persistCombatState(
+    gameId: string,
+    options: {
+        character: Character;
+        combatState: CombatState;
+        lastCombatTurn?: number | null;
+    },
+): Promise<void> {
+    const update: Record<string, unknown> = {
+        character: stripUndefined(options.character),
+        combatState: stripUndefined(options.combatState),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+
+    if (options.lastCombatTurn !== undefined) {
+        update.lastCombatTurn = options.lastCombatTurn;
+    }
+
+    await db.collection(COLLECTIONS.games).doc(gameId).update(update);
+}
+
+export async function persistCombatVictory(
+    gameId: string,
+    options: {
+        character: Character;
+        inventory: InventoryItem[];
+        lastItemRewardTurn: number | null;
+        lastCombatTurn: number;
+    },
+): Promise<void> {
+    await db.collection(COLLECTIONS.games).doc(gameId).update({
+        character: stripUndefined(options.character),
+        inventory: stripUndefined(options.inventory),
+        lastItemRewardTurn: options.lastItemRewardTurn,
+        lastCombatTurn: options.lastCombatTurn,
+        combatState: null,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+}
+
+export async function clearCombatState(gameId: string, character: Character): Promise<void> {
+    await db.collection(COLLECTIONS.games).doc(gameId).update({
+        character: stripUndefined(character),
+        combatState: null,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+}
+
+export async function defeatGame(gameId: string, character: Character): Promise<void> {
+    await db.collection(COLLECTIONS.games).doc(gameId).update({
+        status: 'defeated',
+        character: stripUndefined(character),
+        combatState: null,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+}
+
+export async function updateCharacterStats(gameId: string, character: Character): Promise<void> {
+    await db.collection(COLLECTIONS.games).doc(gameId).update({
+        character: stripUndefined(character),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
 }

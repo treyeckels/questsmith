@@ -10,7 +10,7 @@ import {
 } from '@ionic/react';
 import { sparklesOutline } from 'ionicons/icons';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import FantasyButton from '../../shared/components/FantasyButton';
 import FantasyFrame from '../../shared/components/FantasyFrame';
 import { useAuth } from '../../shared/hooks/useAuth';
@@ -21,6 +21,7 @@ import './CampaignGenerationPage.css';
 
 const NewAdventurePage: React.FC = () => {
     const history = useHistory();
+    const location = useLocation();
     const { user } = useAuth();
     const [game, setGame] = useState<GameSummary | null>(null);
     const [resolving, setResolving] = useState(true);
@@ -67,10 +68,11 @@ const NewAdventurePage: React.FC = () => {
         setError(null);
 
         try {
+            const restoreHealth = new URLSearchParams(location.search).get('restoreHealth') === '1';
             await startNewAdventure(game.id, {
                 characterName: game.character.name,
                 characterClass: game.character.class,
-            });
+            }, { restoreHealth });
             history.replace('/game');
         } catch (adventureError) {
             const message = adventureError instanceof Error
@@ -79,7 +81,7 @@ const NewAdventurePage: React.FC = () => {
             setError(message);
             setLoading(false);
         }
-    }, [game, history]);
+    }, [game, history, location.search]);
 
     useEffect(() => {
         if (!resolving && game && !loading && !error) {

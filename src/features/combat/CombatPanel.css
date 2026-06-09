@@ -1,0 +1,105 @@
+.combat-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.combat-panel__header {
+    text-align: center;
+}
+
+.combat-panel__header h3 {
+    margin: 0 0 0.25rem;
+    font-family: var(--qs-font-display, serif);
+    color: var(--qs-color-ink, #2c1810);
+}
+
+.combat-panel__subtitle {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.85;
+}
+
+.combat-panel__stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.combat-panel__stat-card {
+    background: rgba(255, 248, 230, 0.85);
+    border: 1px solid rgba(92, 64, 35, 0.25);
+    border-radius: 8px;
+    padding: 0.75rem;
+    text-align: center;
+}
+
+.combat-panel__stat-card strong {
+    display: block;
+    font-size: 1.1rem;
+    margin-top: 0.25rem;
+}
+
+.combat-panel__roll {
+    background: rgba(44, 24, 16, 0.08);
+    border-radius: 8px;
+    padding: 0.75rem;
+    text-align: center;
+}
+
+.combat-panel__roll-label {
+    margin: 0 0 0.25rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
+}
+
+.combat-panel__roll-value {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.combat-panel__narration {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.combat-panel__narration p {
+    margin: 0 0 0.75rem;
+}
+
+.combat-panel__narration p:last-child {
+    margin-bottom: 0;
+}
+
+.combat-panel__victory {
+    text-align: center;
+    padding: 0.5rem 0;
+}
+
+.combat-panel__rewards {
+    margin: 0.5rem 0 0;
+    font-size: 0.95rem;
+}
+
+.combat-panel__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.combat-panel__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: rgba(248, 236, 210, 0.75);
+    border-radius: 8px;
+    z-index: 2;
+}

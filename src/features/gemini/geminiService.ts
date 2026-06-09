@@ -2,6 +2,8 @@ import { auth } from '../../firebase';
 import type {
     CampaignGenerationRequest,
     CampaignGenerationResponse,
+    CombatNarrationRequest,
+    CombatNarrationResponse,
     ItemRewardGenerationRequest,
     ItemRewardGenerationResponse,
     SceneGenerationRequest,
@@ -9,6 +11,7 @@ import type {
 } from './geminiTypes';
 import {
     validateCampaignGenerationResponse,
+    validateCombatNarrationResponse,
     validateItemRewardGenerationResponse,
     validateSceneGenerationResponse,
 } from './geminiSchemas';
@@ -27,9 +30,15 @@ interface GenerateSceneApiResult {
 
 const SCENE_API_PATH = '/api/generateScene';
 const ITEM_REWARD_API_PATH = '/api/generateItemReward';
+const COMBAT_NARRATION_API_PATH = '/api/generateCombatNarration';
 
 interface GenerateItemRewardApiResult {
     item?: ItemRewardGenerationResponse;
+    error?: string;
+}
+
+interface GenerateCombatNarrationApiResult {
+    narration?: CombatNarrationResponse;
     error?: string;
 }
 
@@ -122,4 +131,20 @@ export async function requestItemRewardGeneration(
     }
 
     return validateItemRewardGenerationResponse(payload.item);
+}
+
+export async function requestCombatNarration(
+    input: CombatNarrationRequest,
+): Promise<CombatNarrationResponse> {
+    const payload = await postGeminiApi<CombatNarrationRequest, GenerateCombatNarrationApiResult>(
+        COMBAT_NARRATION_API_PATH,
+        input,
+        'Combat narration',
+    );
+
+    if (!payload.narration) {
+        throw new Error('Combat narration returned an empty response.');
+    }
+
+    return validateCombatNarrationResponse(payload.narration);
 }
