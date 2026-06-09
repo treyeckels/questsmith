@@ -1,3 +1,10 @@
+export type CampaignPhase =
+    | 'opening'
+    | 'rising_action'
+    | 'climax'
+    | 'finale'
+    | 'completed';
+
 export interface CampaignLocation {
     id: string;
     name: string;
@@ -21,8 +28,22 @@ export interface Campaign {
     mainQuestHook: string;
     currentObjective: string;
     currentLocationId: string;
+    startingLocationName: string;
+    phase: CampaignPhase;
     locations: CampaignLocation[];
     npcs: CampaignNpc[];
+}
+
+export interface CampaignSummary {
+    title: string;
+    mainObjective: string;
+    startingLocationName: string;
+    turnsPlayed: number;
+    majorEvents: Array<{
+        turnNumber: number;
+        description: string;
+    }>;
+    endingNarrative: string;
 }
 
 export interface CampaignGenerationInput {

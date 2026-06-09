@@ -2,7 +2,10 @@ import { Route } from 'react-router-dom';
 import { IonRouterOutlet } from '@ionic/react';
 import React from 'react';
 import AuthPage from '../features/auth/AuthPage';
+import CampaignCompletePage from '../features/campaign/CampaignCompletePage';
 import CampaignGenerationPage from '../features/campaign/CampaignGenerationPage';
+import CampaignSummaryPage from '../features/campaign/CampaignSummaryPage';
+import NewAdventurePage from '../features/campaign/NewAdventurePage';
 import CharacterCreationPage from '../features/character/CharacterCreationPage';
 import GamePage from '../features/game/GamePage';
 import GuestRoute from '../shared/components/GuestRoute';
@@ -24,6 +27,21 @@ const AppRoutes: React.FC = () => (
         <Route exact path="/campaign/generate">
             <ProtectedRoute>
                 <CampaignGenerationPage />
+            </ProtectedRoute>
+        </Route>
+        <Route exact path="/campaign/complete">
+            <ProtectedRoute>
+                <CampaignCompletePage />
+            </ProtectedRoute>
+        </Route>
+        <Route exact path="/campaign/summary">
+            <ProtectedRoute>
+                <CampaignSummaryPage />
+            </ProtectedRoute>
+        </Route>
+        <Route exact path="/campaign/new">
+            <ProtectedRoute>
+                <NewAdventurePage />
             </ProtectedRoute>
         </Route>
         <Route exact path="/game">

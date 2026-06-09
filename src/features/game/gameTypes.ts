@@ -19,6 +19,20 @@ export interface Scene {
     locationId: string;
     narrative: string;
     choices: SceneChoice[];
+    isEndingScene?: boolean;
+}
+
+export interface CampaignCompletionRecord {
+    title: string;
+    mainObjective: string;
+    startingLocationName: string;
+    endingNarrative: string;
+    turnsPlayed: number;
+    majorEvents: Array<{
+        turnNumber: number;
+        description: string;
+    }>;
+    completedAt: firebase.firestore.Timestamp;
 }
 
 export type TurnEventType =
@@ -53,6 +67,7 @@ export interface GameDocument {
     character: Character;
     campaign: Campaign | null;
     currentScene: Scene | null;
+    campaignCompletion: CampaignCompletionRecord | null;
     inventory: [];
     quests: [];
 }
@@ -62,9 +77,16 @@ export interface GameSummary {
     character: Character;
     campaign: Campaign | null;
     status: GameStatus;
+    campaignCompletion: CampaignCompletionRecord | null;
 }
 
 export interface ActiveGame extends GameSummary {
     campaign: Campaign;
     currentScene: Scene | null;
+}
+
+export interface CompletedGame extends GameSummary {
+    campaign: Campaign;
+    campaignCompletion: CampaignCompletionRecord;
+    status: 'completed';
 }

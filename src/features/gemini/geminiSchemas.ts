@@ -98,7 +98,10 @@ function isSceneChoice(value: unknown): boolean {
         && (choice.riskLevel === undefined || isRiskLevel(choice.riskLevel));
 }
 
-export function validateSceneGenerationResponse(data: unknown): SceneGenerationResponse {
+export function validateSceneGenerationResponse(
+    data: unknown,
+    options: { isCampaignComplete?: boolean } = {},
+): SceneGenerationResponse {
     if (!data || typeof data !== 'object') {
         throw new Error('Scene response was not a valid object.');
     }
@@ -109,7 +112,22 @@ export function validateSceneGenerationResponse(data: unknown): SceneGenerationR
         throw new Error('Scene response is missing narrative text.');
     }
 
-    if (!Array.isArray(response.choices) || response.choices.length < 2 || response.choices.length > 4) {
+    if (!Array.isArray(response.choices)) {
+        throw new Error('Scene response must include a choices array.');
+    }
+
+    if (options.isCampaignComplete) {
+        if (response.choices.length !== 0) {
+            throw new Error('Campaign completion scene must not include player choices.');
+        }
+
+        return {
+            narrative: response.narrative.trim(),
+            choices: [],
+        };
+    }
+
+    if (response.choices.length < 2 || response.choices.length > 4) {
         throw new Error('Scene response must include 2-4 choices.');
     }
 

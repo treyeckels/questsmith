@@ -36,6 +36,13 @@ export interface SceneGenerationNpcContext {
     role: string;
 }
 
+export type SceneCampaignPhase =
+    | 'opening'
+    | 'rising_action'
+    | 'climax'
+    | 'finale'
+    | 'completed';
+
 export interface SceneGenerationRequest {
     campaignTitle: string;
     mainQuestHook: string;
@@ -47,6 +54,10 @@ export interface SceneGenerationRequest {
     recentHistory: string[];
     npcs: SceneGenerationNpcContext[];
     isOpeningScene: boolean;
+    campaignPhase: SceneCampaignPhase;
+    turnNumber: number;
+    isFinale: boolean;
+    isCampaignComplete: boolean;
 }
 
 export interface SceneGenerationChoiceResponse {

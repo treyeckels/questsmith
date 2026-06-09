@@ -228,6 +228,21 @@
     --color: var(--qs-text);
 }
 
+.game-page__ending {
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(139, 105, 20, 0.22);
+    text-align: center;
+}
+
+.game-page__ending p {
+    margin: 0;
+    font-family: var(--qs-font-display);
+    font-size: clamp(0.9rem, 3.2vw, 1rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--qs-bronze);
+}
+
 .game-page__scene-loading,
 .game-page__scene-error {
     display: flex;

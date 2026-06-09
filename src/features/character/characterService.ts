@@ -58,6 +58,7 @@ export async function createCharacterGame(
         character,
         campaign: null,
         currentScene: null,
+        campaignCompletion: null,
         inventory: [],
         quests: [],
     });

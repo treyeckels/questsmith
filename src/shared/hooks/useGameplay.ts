@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getPhaseForTurn } from '../../features/campaign/campaignPhase';
 import type { ActiveGame, Scene } from '../../features/game/gameTypes';
 import { getActiveGameForPlay } from '../../features/game/gameService';
 import { advanceStoryWithChoice, generateOpeningScene } from '../../features/game/sceneService';
 
-type GameplayStatus = 'loading' | 'ready' | 'generating' | 'processing' | 'error';
+type GameplayStatus = 'loading' | 'ready' | 'generating' | 'processing' | 'completed' | 'error';
 
 export function useGameplay(userId: string | undefined) {
     const [game, setGame] = useState<ActiveGame | null>(null);
@@ -73,7 +74,29 @@ export function useGameplay(userId: string | undefined) {
 
         try {
             const nextScene = await advanceStoryWithChoice(game, choiceId);
-            setGame((current) => (current ? { ...current, currentScene: nextScene } : current));
+
+            if (nextScene.isEndingScene) {
+                setGame((current) => (current ? {
+                    ...current,
+                    currentScene: nextScene,
+                    status: 'completed',
+                    campaign: {
+                        ...current.campaign,
+                        phase: 'completed',
+                    },
+                } : current));
+                setStatus('completed');
+                return;
+            }
+
+            setGame((current) => (current ? {
+                ...current,
+                currentScene: nextScene,
+                campaign: {
+                    ...current.campaign,
+                    phase: getPhaseForTurn(nextScene.turnNumber),
+                },
+            } : current));
             setStatus('ready');
         } catch (choiceError) {
             const message = choiceError instanceof Error
@@ -118,5 +141,6 @@ export function useGameplay(userId: string | undefined) {
         isBusy: status === 'loading' || status === 'generating' || status === 'processing',
         isError: status === 'error',
         isReady: status === 'ready',
+        isCompleted: status === 'completed',
     };
 }
