@@ -1,0 +1,166 @@
+.inventory-panel {
+    --backdrop-opacity: 0.55;
+}
+
+.inventory-panel__header ion-toolbar {
+    --background: var(--qs-bg-charcoal);
+    --color: var(--qs-text);
+    --border-width: 0 0 1px 0;
+    --border-color: var(--qs-gold);
+    --border-style: solid;
+}
+
+.inventory-panel__header ion-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--qs-font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.inventory-panel__content {
+    --background: var(--qs-bg-charcoal);
+}
+
+.inventory-panel__parchment {
+    margin: 0.75rem;
+    padding: clamp(1rem, 4vw, 1.35rem);
+    min-height: calc(100% - 1.5rem);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 248, 230, 0.92) 0%,
+            rgba(244, 232, 204, 0.96) 50%,
+            rgba(235, 224, 196, 0.98) 100%
+        ),
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 3px,
+            rgba(139, 105, 20, 0.04) 3px,
+            rgba(139, 105, 20, 0.04) 4px
+        );
+    border: 1px solid rgba(139, 105, 20, 0.45);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -1px 0 rgba(139, 105, 20, 0.12),
+        0 4px 16px rgba(0, 0, 0, 0.28);
+    color: var(--qs-plaque-text);
+}
+
+.inventory-panel__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.65rem;
+    padding: 2rem 1rem;
+}
+
+.inventory-panel__empty ion-icon {
+    font-size: 2.25rem;
+    color: var(--qs-bronze);
+    opacity: 0.75;
+}
+
+.inventory-panel__empty h2 {
+    margin: 0;
+    font-family: var(--qs-font-display);
+    font-size: clamp(1rem, 4vw, 1.2rem);
+    color: var(--qs-bronze);
+}
+
+.inventory-panel__empty p {
+    margin: 0;
+    max-width: 18rem;
+    font-family: var(--qs-font-body);
+    font-size: clamp(0.85rem, 3vw, 0.95rem);
+    line-height: 1.55;
+    color: var(--qs-plaque-text-muted);
+}
+
+.inventory-panel__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.inventory-panel__item {
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid rgba(139, 105, 20, 0.18);
+}
+
+.inventory-panel__item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.inventory-panel__item-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.inventory-panel__item-header h3 {
+    margin: 0;
+    font-family: var(--qs-font-display);
+    font-size: clamp(0.95rem, 3.5vw, 1.05rem);
+    color: var(--qs-plaque-text);
+    line-height: 1.25;
+}
+
+.inventory-panel__rarity {
+    flex-shrink: 0;
+    font-family: var(--qs-font-display);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+}
+
+.inventory-panel__rarity--common {
+    color: #5c5348;
+}
+
+.inventory-panel__rarity--uncommon {
+    color: #3d6b4f;
+}
+
+.inventory-panel__rarity--rare {
+    color: #2f5f8f;
+}
+
+.inventory-panel__rarity--epic {
+    color: #6b3f8f;
+}
+
+.inventory-panel__rarity--legendary {
+    color: #9a6b1f;
+}
+
+.inventory-panel__type {
+    margin: 0.3rem 0 0.45rem;
+    font-family: var(--qs-font-display);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--qs-bronze);
+}
+
+.inventory-panel__description {
+    margin: 0;
+    font-family: var(--qs-font-body);
+    font-size: clamp(0.82rem, 3vw, 0.92rem);
+    line-height: 1.55;
+    color: var(--qs-plaque-text-muted);
+}

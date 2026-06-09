@@ -1,6 +1,7 @@
 import firebase from 'firebase/compat/app';
 import type { Campaign } from '../campaign/campaignTypes';
 import type { Character } from '../character/characterTypes';
+import type { InventoryItem } from '../inventory/inventoryTypes';
 
 export type GameStatus = 'active' | 'completed' | 'defeated';
 
@@ -68,7 +69,7 @@ export interface GameDocument {
     campaign: Campaign | null;
     currentScene: Scene | null;
     campaignCompletion: CampaignCompletionRecord | null;
-    inventory: [];
+    inventory: InventoryItem[];
     quests: [];
 }
 
@@ -78,6 +79,7 @@ export interface GameSummary {
     campaign: Campaign | null;
     status: GameStatus;
     campaignCompletion: CampaignCompletionRecord | null;
+    inventory: InventoryItem[];
 }
 
 export interface ActiveGame extends GameSummary {

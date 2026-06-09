@@ -424,3 +424,129 @@ I want to review what happened during my adventure,
 
 - The summary is generated from saved campaign data.
 - The summary can be viewed again after returning to the game.
+
+# Epic 14: Rewards and Adventure Systems
+
+## Goal
+
+Increase player engagement by allowing players to discover items, earn rewards, survive encounters, and track adventure progress.
+
+---
+
+## Story: Discover Items
+
+**As a player,**
+I want to find interesting items during my adventure,
+**so that** my choices feel rewarding and memorable.
+
+### Acceptance Criteria
+
+- Story events may award items.
+- Items have:
+  - Name
+  - Description
+  - Type
+  - Rarity
+
+- Items are saved to the player's inventory.
+- Item acquisition is displayed in the story UI.
+- Items persist between sessions.
+
+---
+
+## Story: View Inventory
+
+**As a player,**
+I want to view my collected items,
+**so that** I can see what I have discovered during my adventure.
+
+### Acceptance Criteria
+
+- An Inventory screen exists.
+- Inventory displays:
+  - Item name
+  - Description
+  - Type
+  - Rarity
+
+- Inventory updates immediately after item acquisition.
+- Inventory persists across sessions.
+
+---
+
+## Story: Encounter Enemies
+
+**As a player,**
+I want to occasionally encounter enemies,
+**so that** adventures contain risk and excitement.
+
+### Acceptance Criteria
+
+- Story scenes may trigger combat encounters.
+- Combat encounters are displayed in a dedicated combat view.
+- Enemy name and HP are displayed.
+- Combat state is saved.
+
+---
+
+## Story: Resolve Combat
+
+**As a player,**
+I want combat to be simple and understandable,
+**so that** I can focus on the story.
+
+### Acceptance Criteria
+
+- Combat uses a d20 roll.
+- Character modifiers are applied.
+- Results are displayed to the player.
+- Combat outcomes include:
+  - Hit
+  - Miss
+  - Victory
+  - Defeat
+
+- HP is updated.
+- Combat results are saved.
+
+---
+
+## Story: Earn Rewards
+
+**As a player,**
+I want successful adventures to provide rewards,
+**so that** progress feels meaningful.
+
+### Acceptance Criteria
+
+- Combat victories may award:
+  - Gold
+  - XP
+  - Items
+
+- Story events may award:
+  - Gold
+  - XP
+  - Items
+
+- Rewards are shown in the UI.
+- Rewards persist across sessions.
+
+---
+
+## Story: View Character Progress
+
+**As a player,**
+I want to track my growth,
+**so that** I can see my hero become stronger.
+
+### Acceptance Criteria
+
+- Character summary displays:
+  - Level
+  - XP
+  - HP
+  - Gold
+
+- Values update after rewards.
+- Progress persists between sessions.

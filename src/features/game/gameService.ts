@@ -14,6 +14,7 @@ import type {
 } from './gameTypes';
 import type { Campaign } from '../campaign/campaignTypes';
 import { normalizeCampaignPhase } from '../campaign/campaignService';
+import { normalizeInventory } from '../inventory/inventoryService';
 
 function mapGameDoc(id: string, data: GameDocument): GameSummary {
     const turnNumber = data.currentScene?.turnNumber ?? 1;
@@ -26,6 +27,7 @@ function mapGameDoc(id: string, data: GameDocument): GameSummary {
             : null,
         status: data.status,
         campaignCompletion: data.campaignCompletion ?? null,
+        inventory: normalizeInventory(data.inventory),
     };
 }
 
@@ -43,6 +45,7 @@ function mapActiveGameDoc(id: string, data: GameDocument): ActiveGame | null {
         currentScene: data.currentScene ?? null,
         status: data.status,
         campaignCompletion: data.campaignCompletion ?? null,
+        inventory: normalizeInventory(data.inventory),
     };
 }
 
@@ -57,6 +60,7 @@ function mapCompletedGameDoc(id: string, data: GameDocument): CompletedGame | nu
         campaign: data.campaign,
         status: 'completed',
         campaignCompletion: data.campaignCompletion,
+        inventory: normalizeInventory(data.inventory),
     };
 }
 

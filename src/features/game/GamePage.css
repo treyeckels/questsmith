@@ -21,6 +21,32 @@
     text-transform: uppercase;
 }
 
+.game-page__inventory-button {
+    --color: var(--qs-gold);
+    position: relative;
+}
+
+.game-page__inventory-button ion-icon {
+    font-size: 1.35rem;
+}
+
+.game-page__inventory-count {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.15rem;
+    min-width: 1rem;
+    height: 1rem;
+    padding: 0 0.2rem;
+    border-radius: 999px;
+    background: var(--qs-gold);
+    color: var(--qs-bg-charcoal);
+    font-family: var(--qs-font-display);
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 1rem;
+    text-align: center;
+}
+
 .game-page__content {
     --background: transparent;
     --color: var(--qs-text);
