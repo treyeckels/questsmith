@@ -25,6 +25,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: true,
       },
+      '/api/generateItemReward': {
+        target: 'https://quest-smith-2a276.web.app',
+        changeOrigin: true,
+        secure: true,
+      },
     },
   },
   test: {

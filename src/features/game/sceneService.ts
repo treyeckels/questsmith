@@ -2,12 +2,16 @@ import type { SceneGenerationResponse } from '../gemini/geminiTypes';
 import { requestSceneGeneration } from '../gemini/geminiService';
 import { normalizeCampaignPhase } from '../campaign/campaignService';
 import { getPhaseForTurn, shouldGenerateCompletionScene } from '../campaign/campaignPhase';
+import { addItemToInventory } from '../inventory/inventoryService';
+import type { InventoryItem } from '../inventory/inventoryTypes';
+import { tryAwardItemReward } from '../rewards/rewardService';
 import { uniqueId } from '../../shared/utils/slugify';
-import type { ActiveGame, Scene, SceneChoice, TurnDocument } from './gameTypes';
+import type { ActiveGame, Scene, SceneAdvanceResult, SceneChoice, TurnDocument } from './gameTypes';
 import {
     completeCampaign,
     getAllTurnRecords,
     getRecentTurnSummaries,
+    persistInventoryReward,
     saveTurnRecord,
     updateCampaignPhase,
     updateCurrentScene,
@@ -118,7 +122,39 @@ function buildMajorEvents(turns: TurnDocument[]) {
     }));
 }
 
-export async function generateOpeningScene(game: ActiveGame): Promise<Scene> {
+async function processItemReward(
+    game: ActiveGame,
+    options: {
+        turnNumber: number;
+        sceneNarrative: string;
+        selectedChoice: string | null;
+        isCampaignComplete?: boolean;
+    },
+): Promise<InventoryItem | null> {
+    const awardedItem = await tryAwardItemReward(game, options);
+
+    if (!awardedItem) {
+        return null;
+    }
+
+    const updatedInventory = addItemToInventory(game.inventory, awardedItem);
+    await persistInventoryReward(game.id, updatedInventory, options.turnNumber);
+
+    return awardedItem;
+}
+
+function buildTurnEvents(awardedItem: InventoryItem | null) {
+    if (!awardedItem) {
+        return [];
+    }
+
+    return [{
+        type: 'item_gain' as const,
+        description: `Acquired ${awardedItem.name}`,
+    }];
+}
+
+export async function generateOpeningScene(game: ActiveGame): Promise<SceneAdvanceResult> {
     const geminiResponse = await requestSceneGeneration(
         buildSceneRequest(game, {
             selectedChoice: null,
@@ -135,14 +171,21 @@ export async function generateOpeningScene(game: ActiveGame): Promise<Scene> {
 
     await updateCampaignPhase(game.id, updatedCampaign);
     await updateCurrentScene(game.id, scene);
-    return scene;
+
+    const awardedItem = await processItemReward(game, {
+        turnNumber: 1,
+        sceneNarrative: geminiResponse.narrative,
+        selectedChoice: null,
+    });
+
+    return { scene, awardedItem };
 }
 
 async function generateCompletionScene(
     game: ActiveGame,
     selectedChoice: SceneChoice,
     currentScene: Scene,
-): Promise<Scene> {
+): Promise<SceneAdvanceResult> {
     const recentHistory = await getRecentTurnSummaries(game.id, 5);
     const nextTurnNumber = currentScene.turnNumber + 1;
 
@@ -195,13 +238,13 @@ async function generateCompletionScene(
         },
     });
 
-    return endingScene;
+    return { scene: endingScene, awardedItem: null };
 }
 
 export async function advanceStoryWithChoice(
     game: ActiveGame,
     choiceId: string,
-): Promise<Scene> {
+): Promise<SceneAdvanceResult> {
     const currentScene = game.currentScene;
     if (!currentScene) {
         throw new Error('There is no active scene to continue from.');
@@ -218,10 +261,11 @@ export async function advanceStoryWithChoice(
 
     const recentHistory = await getRecentTurnSummaries(game.id, 5);
     const nextTurnNumber = currentScene.turnNumber + 1;
+    const selectedChoiceLabel = `${selectedChoice.label} (${selectedChoice.intent})`;
 
     const geminiResponse = await requestSceneGeneration(
         buildSceneRequest(game, {
-            selectedChoice: `${selectedChoice.label} (${selectedChoice.intent})`,
+            selectedChoice: selectedChoiceLabel,
             isOpeningScene: false,
             recentHistory,
             turnNumber: nextTurnNumber,
@@ -236,13 +280,19 @@ export async function advanceStoryWithChoice(
         location.id,
     );
 
+    const awardedItem = await processItemReward(game, {
+        turnNumber: nextTurnNumber,
+        sceneNarrative: geminiResponse.narrative,
+        selectedChoice: selectedChoiceLabel,
+    });
+
     const turnRecord: Omit<TurnDocument, 'createdAt'> = {
         turnNumber: currentScene.turnNumber,
         selectedChoiceId: selectedChoice.id,
         selectedChoiceLabel: selectedChoice.label,
         sceneSummary: geminiResponse.narrative.slice(0, 500),
         locationId: currentScene.locationId,
-        events: [],
+        events: buildTurnEvents(awardedItem),
     };
 
     const updatedCampaign = normalizeCampaignPhase(game.campaign, nextTurnNumber);
@@ -251,5 +301,5 @@ export async function advanceStoryWithChoice(
     await updateCampaignPhase(game.id, updatedCampaign);
     await updateCurrentScene(game.id, nextScene);
 
-    return nextScene;
+    return { scene: nextScene, awardedItem };
 }

@@ -1,6 +1,17 @@
 import { auth } from '../../firebase';
-import type { CampaignGenerationRequest, CampaignGenerationResponse, SceneGenerationRequest, SceneGenerationResponse } from './geminiTypes';
-import { validateCampaignGenerationResponse, validateSceneGenerationResponse } from './geminiSchemas';
+import type {
+    CampaignGenerationRequest,
+    CampaignGenerationResponse,
+    ItemRewardGenerationRequest,
+    ItemRewardGenerationResponse,
+    SceneGenerationRequest,
+    SceneGenerationResponse,
+} from './geminiTypes';
+import {
+    validateCampaignGenerationResponse,
+    validateItemRewardGenerationResponse,
+    validateSceneGenerationResponse,
+} from './geminiSchemas';
 
 interface GenerateCampaignApiResult {
     campaign?: CampaignGenerationResponse;
@@ -15,6 +26,12 @@ interface GenerateSceneApiResult {
 }
 
 const SCENE_API_PATH = '/api/generateScene';
+const ITEM_REWARD_API_PATH = '/api/generateItemReward';
+
+interface GenerateItemRewardApiResult {
+    item?: ItemRewardGenerationResponse;
+    error?: string;
+}
 
 async function postGeminiApi<TPayload extends object, TResult>(
     path: string,
@@ -89,4 +106,20 @@ export async function requestSceneGeneration(
     return validateSceneGenerationResponse(payload.scene, {
         isCampaignComplete: input.isCampaignComplete,
     });
+}
+
+export async function requestItemRewardGeneration(
+    input: ItemRewardGenerationRequest,
+): Promise<ItemRewardGenerationResponse> {
+    const payload = await postGeminiApi<ItemRewardGenerationRequest, GenerateItemRewardApiResult>(
+        ITEM_REWARD_API_PATH,
+        input,
+        'Item reward generation',
+    );
+
+    if (!payload.item) {
+        throw new Error('Item reward generation returned an empty response.');
+    }
+
+    return validateItemRewardGenerationResponse(payload.item);
 }

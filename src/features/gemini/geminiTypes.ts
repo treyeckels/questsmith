@@ -70,3 +70,5 @@ export interface SceneGenerationResponse {
     narrative: string;
     choices: SceneGenerationChoiceResponse[];
 }
+
+export type { ItemRewardGenerationRequest, ItemRewardGenerationResponse } from '../rewards/rewardTypes';

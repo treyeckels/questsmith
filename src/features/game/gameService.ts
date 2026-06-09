@@ -14,6 +14,7 @@ import type {
 } from './gameTypes';
 import type { Campaign } from '../campaign/campaignTypes';
 import { normalizeCampaignPhase } from '../campaign/campaignService';
+import type { InventoryItem } from '../inventory/inventoryTypes';
 import { normalizeInventory } from '../inventory/inventoryService';
 
 function mapGameDoc(id: string, data: GameDocument): GameSummary {
@@ -28,6 +29,7 @@ function mapGameDoc(id: string, data: GameDocument): GameSummary {
         status: data.status,
         campaignCompletion: data.campaignCompletion ?? null,
         inventory: normalizeInventory(data.inventory),
+        lastItemRewardTurn: data.lastItemRewardTurn ?? null,
     };
 }
 
@@ -46,6 +48,7 @@ function mapActiveGameDoc(id: string, data: GameDocument): ActiveGame | null {
         status: data.status,
         campaignCompletion: data.campaignCompletion ?? null,
         inventory: normalizeInventory(data.inventory),
+        lastItemRewardTurn: data.lastItemRewardTurn ?? null,
     };
 }
 
@@ -61,6 +64,7 @@ function mapCompletedGameDoc(id: string, data: GameDocument): CompletedGame | nu
         status: 'completed',
         campaignCompletion: data.campaignCompletion,
         inventory: normalizeInventory(data.inventory),
+        lastItemRewardTurn: data.lastItemRewardTurn ?? null,
     };
 }
 
@@ -288,6 +292,18 @@ export async function getTurnCount(gameId: string): Promise<number> {
 export async function updateCampaignPhase(gameId: string, campaign: Campaign): Promise<void> {
     await db.collection(COLLECTIONS.games).doc(gameId).update({
         campaign,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+}
+
+export async function persistInventoryReward(
+    gameId: string,
+    inventory: InventoryItem[],
+    lastItemRewardTurn: number,
+): Promise<void> {
+    await db.collection(COLLECTIONS.games).doc(gameId).update({
+        inventory: stripUndefined(inventory),
+        lastItemRewardTurn,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
 }

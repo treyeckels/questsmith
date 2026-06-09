@@ -1,4 +1,5 @@
-import type { CampaignGenerationResponse, SceneGenerationResponse } from './geminiTypes';
+import type { CampaignGenerationResponse, ItemRewardGenerationResponse, SceneGenerationResponse } from './geminiTypes';
+import type { InventoryItemType } from '../inventory/inventoryTypes';
 
 function isNonEmptyString(value: unknown): value is string {
     return typeof value === 'string' && value.trim().length > 0;
@@ -148,5 +149,37 @@ export function validateSceneGenerationResponse(
             }
             return mapped;
         }),
+    };
+}
+
+const ITEM_TYPES: InventoryItemType[] = ['weapon', 'armor', 'potion', 'quest', 'misc'];
+
+function isItemType(value: unknown): value is InventoryItemType {
+    return typeof value === 'string' && ITEM_TYPES.includes(value as InventoryItemType);
+}
+
+export function validateItemRewardGenerationResponse(data: unknown): ItemRewardGenerationResponse {
+    if (!data || typeof data !== 'object') {
+        throw new Error('Item reward response was not a valid object.');
+    }
+
+    const response = data as Record<string, unknown>;
+
+    if (!isNonEmptyString(response.name)) {
+        throw new Error('Item reward response is missing a name.');
+    }
+
+    if (!isNonEmptyString(response.description)) {
+        throw new Error('Item reward response is missing a description.');
+    }
+
+    if (!isItemType(response.type)) {
+        throw new Error('Item reward response has an invalid type.');
+    }
+
+    return {
+        name: response.name.trim(),
+        description: response.description.trim(),
+        type: response.type,
     };
 }
