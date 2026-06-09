@@ -1,6 +1,7 @@
 import firebase from 'firebase/compat/app';
 import type { Campaign } from '../campaign/campaignTypes';
 import type { Character } from '../character/characterTypes';
+import type { CombatState } from '../combat/combatTypes';
 import type { InventoryItem } from '../inventory/inventoryTypes';
 
 export type GameStatus = 'active' | 'completed' | 'defeated';
@@ -50,6 +51,14 @@ export interface TurnEvent {
     description: string;
 }
 
+export interface DiceRollRecord {
+    type: 'attack' | 'defense';
+    roll: number;
+    modifier: number;
+    total: number;
+    outcome: 'success' | 'failure';
+}
+
 export interface TurnDocument {
     turnNumber: number;
     selectedChoiceId: string;
@@ -57,6 +66,7 @@ export interface TurnDocument {
     sceneSummary: string;
     locationId: string;
     events: TurnEvent[];
+    diceRolls?: DiceRollRecord[];
     createdAt: firebase.firestore.Timestamp;
 }
 
@@ -71,12 +81,15 @@ export interface GameDocument {
     campaignCompletion: CampaignCompletionRecord | null;
     inventory: InventoryItem[];
     lastItemRewardTurn?: number | null;
+    lastCombatTurn?: number | null;
+    combatState?: CombatState | null;
     quests: [];
 }
 
 export interface SceneAdvanceResult {
     scene: Scene;
     awardedItem: InventoryItem | null;
+    combatState: CombatState | null;
 }
 
 export interface GameSummary {
@@ -87,6 +100,8 @@ export interface GameSummary {
     campaignCompletion: CampaignCompletionRecord | null;
     inventory: InventoryItem[];
     lastItemRewardTurn: number | null;
+    lastCombatTurn: number | null;
+    combatState: CombatState | null;
 }
 
 export interface ActiveGame extends GameSummary {

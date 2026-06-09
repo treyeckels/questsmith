@@ -5,6 +5,12 @@ import { getPhaseForTurn, shouldGenerateCompletionScene } from '../campaign/camp
 import { addItemToInventory } from '../inventory/inventoryService';
 import type { InventoryItem } from '../inventory/inventoryTypes';
 import { tryAwardItemReward } from '../rewards/rewardService';
+import {
+    persistNewCombatEncounter,
+    shouldTriggerCombat,
+    startCombatEncounter,
+} from '../combat/combatService';
+import type { CombatState } from '../combat/combatTypes';
 import { uniqueId } from '../../shared/utils/slugify';
 import type { ActiveGame, Scene, SceneAdvanceResult, SceneChoice, TurnDocument } from './gameTypes';
 import {
@@ -154,6 +160,23 @@ function buildTurnEvents(awardedItem: InventoryItem | null) {
     }];
 }
 
+async function maybeStartCombatEncounter(
+    game: ActiveGame,
+    turnNumber: number,
+    riskLevel?: SceneChoice['riskLevel'],
+): Promise<CombatState | null> {
+    if (!shouldTriggerCombat(turnNumber, game.lastCombatTurn ?? null, {
+        riskLevel,
+        hasActiveCombat: Boolean(game.combatState),
+    })) {
+        return null;
+    }
+
+    const combatState = startCombatEncounter(turnNumber);
+    await persistNewCombatEncounter(game, combatState);
+    return combatState;
+}
+
 export async function generateOpeningScene(game: ActiveGame): Promise<SceneAdvanceResult> {
     const geminiResponse = await requestSceneGeneration(
         buildSceneRequest(game, {
@@ -178,7 +201,7 @@ export async function generateOpeningScene(game: ActiveGame): Promise<SceneAdvan
         selectedChoice: null,
     });
 
-    return { scene, awardedItem };
+    return { scene, awardedItem, combatState: null };
 }
 
 async function generateCompletionScene(
@@ -238,7 +261,7 @@ async function generateCompletionScene(
         },
     });
 
-    return { scene: endingScene, awardedItem: null };
+    return { scene: endingScene, awardedItem: null, combatState: null };
 }
 
 export async function advanceStoryWithChoice(
@@ -301,5 +324,15 @@ export async function advanceStoryWithChoice(
     await updateCampaignPhase(game.id, updatedCampaign);
     await updateCurrentScene(game.id, nextScene);
 
-    return { scene: nextScene, awardedItem };
+    const combatState = await maybeStartCombatEncounter(
+        {
+            ...game,
+            inventory: awardedItem ? addItemToInventory(game.inventory, awardedItem) : game.inventory,
+            lastItemRewardTurn: awardedItem ? nextTurnNumber : game.lastItemRewardTurn,
+        },
+        nextTurnNumber,
+        selectedChoice.riskLevel,
+    );
+
+    return { scene: nextScene, awardedItem, combatState };
 }

@@ -74,6 +74,13 @@
         }
       },
       {
+        "source": "/api/generateCombatNarration",
+        "function": {
+          "functionId": "generateCombatNarration",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

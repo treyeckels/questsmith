@@ -72,3 +72,4 @@ export interface SceneGenerationResponse {
 }
 
 export type { ItemRewardGenerationRequest, ItemRewardGenerationResponse } from '../rewards/rewardTypes';
+export type { CombatNarrationRequest, CombatNarrationResponse } from '../combat/combatNarrationTypes';

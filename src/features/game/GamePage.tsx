@@ -30,6 +30,7 @@ import { useGameplay } from '../../shared/hooks/useGameplay';
 import InventoryPanel from '../inventory/InventoryPanel';
 import { sortInventoryItems } from '../inventory/inventoryService';
 import ItemRewardModal from '../rewards/ItemRewardModal';
+import CombatPanel from '../combat/CombatPanel';
 import { gameNeedsCampaignGeneration } from './gameService';
 import './GamePage.css';
 
@@ -43,12 +44,17 @@ const GamePage: React.FC = () => {
         game,
         error,
         selectChoice,
+        attackInCombat,
+        continueAfterCombatVictory,
         retry,
         isLoading,
         isBusy,
         isError,
         isCompleted,
+        isDefeated,
+        isInCombat,
         pendingReward,
+        victoryRewards,
         clearPendingReward,
     } = useGameplay(user?.uid);
 
@@ -69,8 +75,13 @@ const GamePage: React.FC = () => {
 
         if (isCompleted || game.status === 'completed') {
             history.replace('/campaign/complete');
+            return;
         }
-    }, [game, history, isCompleted, isLoading]);
+
+        if (isDefeated || game.status === 'defeated') {
+            history.replace('/campaign/defeat');
+        }
+    }, [game, history, isCompleted, isDefeated, isLoading]);
 
     const inventoryItems = useMemo(
         () => sortInventoryItems(game?.inventory ?? []),
@@ -181,7 +192,7 @@ const GamePage: React.FC = () => {
                                 </div>
                             )}
 
-                            {scene && (
+                            {scene && !isInCombat && (
                                 <>
                                     {isError && (
                                         <div className="game-page__scene-error" role="alert">
@@ -222,7 +233,25 @@ const GamePage: React.FC = () => {
                                 </>
                             )}
 
-                            {isBusy && scene && (
+                            {scene && isInCombat && game.combatState && (
+                                <CombatPanel
+                                    combatState={game.combatState}
+                                    character={character}
+                                    isBusy={isBusy}
+                                    onAttack={() => void attackInCombat()}
+                                    onContinue={() => void continueAfterCombatVictory()}
+                                    victoryRewards={victoryRewards ?? undefined}
+                                />
+                            )}
+
+                            {scene && isInCombat && isBusy && (
+                                <div className="game-page__scene-overlay" aria-live="polite">
+                                    <IonSpinner name="crescent" />
+                                    <p>Resolving combat...</p>
+                                </div>
+                            )}
+
+                            {isBusy && scene && !isInCombat && (
                                 <div className="game-page__scene-overlay" aria-live="polite">
                                     <IonSpinner name="crescent" />
                                     <p>Weaving the next scene...</p>

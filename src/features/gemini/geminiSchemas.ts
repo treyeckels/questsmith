@@ -1,4 +1,4 @@
-import type { CampaignGenerationResponse, ItemRewardGenerationResponse, SceneGenerationResponse } from './geminiTypes';
+import type { CampaignGenerationResponse, CombatNarrationResponse, ItemRewardGenerationResponse, SceneGenerationResponse } from './geminiTypes';
 import type { InventoryItemType } from '../inventory/inventoryTypes';
 
 function isNonEmptyString(value: unknown): value is string {
@@ -181,5 +181,21 @@ export function validateItemRewardGenerationResponse(data: unknown): ItemRewardG
         name: response.name.trim(),
         description: response.description.trim(),
         type: response.type,
+    };
+}
+
+export function validateCombatNarrationResponse(data: unknown): CombatNarrationResponse {
+    if (!data || typeof data !== 'object') {
+        throw new Error('Combat narration response was not a valid object.');
+    }
+
+    const response = data as Record<string, unknown>;
+
+    if (!isNonEmptyString(response.narrative)) {
+        throw new Error('Combat narration response is missing narrative text.');
+    }
+
+    return {
+        narrative: response.narrative.trim(),
     };
 }

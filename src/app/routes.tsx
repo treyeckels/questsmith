@@ -5,6 +5,7 @@ import AuthPage from '../features/auth/AuthPage';
 import CampaignCompletePage from '../features/campaign/CampaignCompletePage';
 import CampaignGenerationPage from '../features/campaign/CampaignGenerationPage';
 import CampaignSummaryPage from '../features/campaign/CampaignSummaryPage';
+import DefeatPage from '../features/campaign/DefeatPage';
 import NewAdventurePage from '../features/campaign/NewAdventurePage';
 import CharacterCreationPage from '../features/character/CharacterCreationPage';
 import GamePage from '../features/game/GamePage';
@@ -32,6 +33,11 @@ const AppRoutes: React.FC = () => (
         <Route exact path="/campaign/complete">
             <ProtectedRoute>
                 <CampaignCompletePage />
+            </ProtectedRoute>
+        </Route>
+        <Route exact path="/campaign/defeat">
+            <ProtectedRoute>
+                <DefeatPage />
             </ProtectedRoute>
         </Route>
         <Route exact path="/campaign/summary">
