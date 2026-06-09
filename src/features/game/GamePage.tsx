@@ -1,4 +1,6 @@
 import {
+    IonButton,
+    IonButtons,
     IonContent,
     IonHeader,
     IonIcon,
@@ -9,6 +11,7 @@ import {
     IonToolbar,
 } from '@ionic/react';
 import {
+    bagOutline,
     cashOutline,
     flashOutline,
     heartOutline,
@@ -17,13 +20,15 @@ import {
     sparklesOutline,
     trendingUpOutline,
 } from 'ionicons/icons';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { signOut } from '../auth/authService';
 import { getClassDefinition, getPortraitDefinition, HEROES_SPRITE_URL } from '../character/characterConfig';
 import FantasyButton from '../../shared/components/FantasyButton';
 import { useAuth } from '../../shared/hooks/useAuth';
 import { useGameplay } from '../../shared/hooks/useGameplay';
+import InventoryPanel from '../inventory/InventoryPanel';
+import { sortInventoryItems } from '../inventory/inventoryService';
 import { gameNeedsCampaignGeneration } from './gameService';
 import './GamePage.css';
 
@@ -32,6 +37,7 @@ const formatModifier = (value: number) => (value >= 0 ? `+${value}` : `${value}`
 const GamePage: React.FC = () => {
     const history = useHistory();
     const { user } = useAuth();
+    const [isInventoryOpen, setIsInventoryOpen] = useState(false);
     const {
         game,
         error,
@@ -62,6 +68,11 @@ const GamePage: React.FC = () => {
             history.replace('/campaign/complete');
         }
     }, [game, history, isCompleted, isLoading]);
+
+    const inventoryItems = useMemo(
+        () => sortInventoryItems(game?.inventory ?? []),
+        [game?.inventory],
+    );
 
     const handleSignOut = async () => {
         await signOut();
@@ -94,6 +105,19 @@ const GamePage: React.FC = () => {
             <IonHeader className="game-page__header">
                 <IonToolbar>
                     <IonTitle>{campaign.title}</IonTitle>
+                    <IonButtons slot="end">
+                        <IonButton
+                            className="game-page__inventory-button"
+                            fill="clear"
+                            onClick={() => setIsInventoryOpen(true)}
+                            aria-label={`Open inventory (${inventoryItems.length} items)`}
+                        >
+                            <IonIcon icon={bagOutline} aria-hidden="true" />
+                            {inventoryItems.length > 0 && (
+                                <span className="game-page__inventory-count">{inventoryItems.length}</span>
+                            )}
+                        </IonButton>
+                    </IonButtons>
                 </IonToolbar>
             </IonHeader>
             <IonContent className="game-page__content">
@@ -205,6 +229,12 @@ const GamePage: React.FC = () => {
                     </section>
 
                     <div className="game-page__footer">
+                        <FantasyButton
+                            variant="secondary"
+                            onClick={() => setIsInventoryOpen(true)}
+                        >
+                            Inventory
+                        </FantasyButton>
                         {game.campaignCompletion && (
                             <FantasyButton
                                 variant="secondary"
@@ -219,6 +249,12 @@ const GamePage: React.FC = () => {
                     </div>
                 </div>
             </IonContent>
+
+            <InventoryPanel
+                isOpen={isInventoryOpen}
+                items={inventoryItems}
+                onClose={() => setIsInventoryOpen(false)}
+            />
         </IonPage>
     );
 };
