@@ -61,3 +61,19 @@ export function formatItemRarity(rarity: InventoryItemRarity): string {
 export function sortInventoryItems(items: InventoryItem[]): InventoryItem[] {
     return [...items].sort((left, right) => right.acquiredAt.toMillis() - left.acquiredAt.toMillis());
 }
+
+export function createInventoryItem(
+    item: Omit<InventoryItem, 'acquiredAt'> & { acquiredAt?: firebase.firestore.Timestamp },
+): InventoryItem {
+    return {
+        ...item,
+        acquiredAt: item.acquiredAt ?? firebase.firestore.Timestamp.now(),
+    };
+}
+
+export function addItemToInventory(
+    inventory: InventoryItem[],
+    item: InventoryItem,
+): InventoryItem[] {
+    return [...inventory, item];
+}

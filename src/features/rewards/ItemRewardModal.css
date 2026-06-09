@@ -1,0 +1,99 @@
+.item-reward-modal {
+    --backdrop-opacity: 0.65;
+}
+
+.item-reward-modal__header ion-toolbar {
+    --background: var(--qs-bg-charcoal);
+    --color: var(--qs-text);
+    --border-width: 0 0 1px 0;
+    --border-color: var(--qs-gold);
+    --border-style: solid;
+}
+
+.item-reward-modal__header ion-title {
+    font-family: var(--qs-font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.item-reward-modal__content {
+    --background: var(--qs-bg-charcoal);
+}
+
+.item-reward-modal__parchment {
+    margin: 1rem;
+    padding: clamp(1.25rem, 4vw, 1.75rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 248, 230, 0.92) 0%,
+            rgba(244, 232, 204, 0.96) 50%,
+            rgba(235, 224, 196, 0.98) 100%
+        );
+    border: 1px solid rgba(139, 105, 20, 0.45);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -1px 0 rgba(139, 105, 20, 0.12),
+        0 4px 16px rgba(0, 0, 0, 0.28);
+    color: var(--qs-plaque-text);
+}
+
+.item-reward-modal__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--qs-font-display);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--qs-bronze);
+}
+
+.item-reward-modal__eyebrow ion-icon {
+    font-size: 1.15rem;
+    color: var(--qs-gold);
+}
+
+.item-reward-modal__name {
+    margin: 0;
+    font-family: var(--qs-font-display);
+    font-size: clamp(1.2rem, 5vw, 1.55rem);
+    color: var(--qs-plaque-text);
+    line-height: 1.2;
+}
+
+.item-reward-modal__rarity {
+    margin: 0;
+    font-family: var(--qs-font-display);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.item-reward-modal__rarity--common { color: #5c5348; }
+.item-reward-modal__rarity--uncommon { color: #3d6b4f; }
+.item-reward-modal__rarity--rare { color: #2f5f8f; }
+.item-reward-modal__rarity--epic { color: #6b3f8f; }
+.item-reward-modal__rarity--legendary { color: #9a6b1f; }
+
+.item-reward-modal__description {
+    margin: 0;
+    max-width: 22rem;
+    font-family: var(--qs-font-body);
+    font-size: clamp(0.88rem, 3.2vw, 0.98rem);
+    line-height: 1.6;
+    color: var(--qs-plaque-text-muted);
+}
+
+.item-reward-modal__parchment .fantasy-button {
+    margin-top: 0.5rem;
+    max-width: 16rem;
+}

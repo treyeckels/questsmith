@@ -29,6 +29,7 @@ import { useAuth } from '../../shared/hooks/useAuth';
 import { useGameplay } from '../../shared/hooks/useGameplay';
 import InventoryPanel from '../inventory/InventoryPanel';
 import { sortInventoryItems } from '../inventory/inventoryService';
+import ItemRewardModal from '../rewards/ItemRewardModal';
 import { gameNeedsCampaignGeneration } from './gameService';
 import './GamePage.css';
 
@@ -47,6 +48,8 @@ const GamePage: React.FC = () => {
         isBusy,
         isError,
         isCompleted,
+        pendingReward,
+        clearPendingReward,
     } = useGameplay(user?.uid);
 
     useEffect(() => {
@@ -254,6 +257,12 @@ const GamePage: React.FC = () => {
                 isOpen={isInventoryOpen}
                 items={inventoryItems}
                 onClose={() => setIsInventoryOpen(false)}
+            />
+
+            <ItemRewardModal
+                isOpen={Boolean(pendingReward)}
+                item={pendingReward}
+                onContinue={clearPendingReward}
             />
         </IonPage>
     );

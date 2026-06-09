@@ -70,7 +70,13 @@ export interface GameDocument {
     currentScene: Scene | null;
     campaignCompletion: CampaignCompletionRecord | null;
     inventory: InventoryItem[];
+    lastItemRewardTurn?: number | null;
     quests: [];
+}
+
+export interface SceneAdvanceResult {
+    scene: Scene;
+    awardedItem: InventoryItem | null;
 }
 
 export interface GameSummary {
@@ -80,6 +86,7 @@ export interface GameSummary {
     status: GameStatus;
     campaignCompletion: CampaignCompletionRecord | null;
     inventory: InventoryItem[];
+    lastItemRewardTurn: number | null;
 }
 
 export interface ActiveGame extends GameSummary {

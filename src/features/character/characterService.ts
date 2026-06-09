@@ -60,6 +60,7 @@ export async function createCharacterGame(
         currentScene: null,
         campaignCompletion: null,
         inventory: [],
+        lastItemRewardTurn: null,
         quests: [],
     });
 

@@ -67,6 +67,13 @@
         }
       },
       {
+        "source": "/api/generateItemReward",
+        "function": {
+          "functionId": "generateItemReward",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

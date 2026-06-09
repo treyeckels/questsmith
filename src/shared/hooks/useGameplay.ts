@@ -3,26 +3,52 @@ import { getPhaseForTurn } from '../../features/campaign/campaignPhase';
 import type { ActiveGame, Scene } from '../../features/game/gameTypes';
 import { getActiveGameForPlay } from '../../features/game/gameService';
 import { advanceStoryWithChoice, generateOpeningScene } from '../../features/game/sceneService';
+import { addItemToInventory } from '../../features/inventory/inventoryService';
+import type { InventoryItem } from '../../features/inventory/inventoryTypes';
 
 type GameplayStatus = 'loading' | 'ready' | 'generating' | 'processing' | 'completed' | 'error';
+
+function applyRewardToGame(game: ActiveGame, item: InventoryItem, turnNumber: number): ActiveGame {
+    return {
+        ...game,
+        inventory: addItemToInventory(game.inventory, item),
+        lastItemRewardTurn: turnNumber,
+    };
+}
 
 export function useGameplay(userId: string | undefined) {
     const [game, setGame] = useState<ActiveGame | null>(null);
     const [status, setStatus] = useState<GameplayStatus>('loading');
     const [error, setError] = useState<string | null>(null);
+    const [pendingReward, setPendingReward] = useState<InventoryItem | null>(null);
     const bootstrappedRef = useRef(false);
 
-    const applyScene = useCallback((scene: Scene) => {
-        setGame((current) => (current ? { ...current, currentScene: scene } : current));
+    const handleSceneAdvance = useCallback((activeGame: ActiveGame, scene: Scene, awardedItem: InventoryItem | null) => {
+        let nextGame: ActiveGame = {
+            ...activeGame,
+            currentScene: scene,
+            campaign: {
+                ...activeGame.campaign,
+                phase: scene.isEndingScene ? 'completed' : getPhaseForTurn(scene.turnNumber),
+            },
+        };
+
+        if (awardedItem) {
+            nextGame = applyRewardToGame(nextGame, awardedItem, scene.turnNumber);
+            setPendingReward(awardedItem);
+        }
+
+        setGame(nextGame);
+        return nextGame;
     }, []);
 
     const bootstrapOpeningScene = useCallback(async (activeGame: ActiveGame) => {
         setStatus('generating');
         setError(null);
-        const scene = await generateOpeningScene(activeGame);
-        applyScene(scene);
+        const result = await generateOpeningScene(activeGame);
+        handleSceneAdvance(activeGame, result.scene, result.awardedItem);
         setStatus('ready');
-    }, [applyScene]);
+    }, [handleSceneAdvance]);
 
     const loadGame = useCallback(async () => {
         if (!userId) {
@@ -73,30 +99,15 @@ export function useGameplay(userId: string | undefined) {
         setError(null);
 
         try {
-            const nextScene = await advanceStoryWithChoice(game, choiceId);
+            const result = await advanceStoryWithChoice(game, choiceId);
 
-            if (nextScene.isEndingScene) {
-                setGame((current) => (current ? {
-                    ...current,
-                    currentScene: nextScene,
-                    status: 'completed',
-                    campaign: {
-                        ...current.campaign,
-                        phase: 'completed',
-                    },
-                } : current));
+            if (result.scene.isEndingScene) {
+                handleSceneAdvance(game, result.scene, result.awardedItem);
                 setStatus('completed');
                 return;
             }
 
-            setGame((current) => (current ? {
-                ...current,
-                currentScene: nextScene,
-                campaign: {
-                    ...current.campaign,
-                    phase: getPhaseForTurn(nextScene.turnNumber),
-                },
-            } : current));
+            handleSceneAdvance(game, result.scene, result.awardedItem);
             setStatus('ready');
         } catch (choiceError) {
             const message = choiceError instanceof Error
@@ -105,7 +116,7 @@ export function useGameplay(userId: string | undefined) {
             setError(message);
             setStatus('error');
         }
-    }, [game]);
+    }, [game, handleSceneAdvance]);
 
     const retry = useCallback(async () => {
         if (!game) {
@@ -130,12 +141,18 @@ export function useGameplay(userId: string | undefined) {
         setStatus('ready');
     }, [bootstrapOpeningScene, game, loadGame]);
 
+    const clearPendingReward = useCallback(() => {
+        setPendingReward(null);
+    }, []);
+
     return {
         game,
         status,
         error,
+        pendingReward,
         selectChoice,
         retry,
+        clearPendingReward,
         isLoading: status === 'loading' || status === 'generating',
         isProcessing: status === 'processing',
         isBusy: status === 'loading' || status === 'generating' || status === 'processing',
