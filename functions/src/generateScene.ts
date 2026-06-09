@@ -10,6 +10,13 @@ if (!admin.apps.length) {
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const geminiApiKey = defineSecret('GEMINI_API_KEY');
 
+type SceneCampaignPhase =
+    | 'opening'
+    | 'rising_action'
+    | 'climax'
+    | 'finale'
+    | 'completed';
+
 interface SceneGenerationRequest {
     campaignTitle: string;
     mainQuestHook: string;
@@ -27,12 +34,79 @@ interface SceneGenerationRequest {
     recentHistory: string[];
     npcs: Array<{ name: string; role: string }>;
     isOpeningScene: boolean;
+    campaignPhase?: SceneCampaignPhase;
+    turnNumber?: number;
+    isFinale?: boolean;
+    isCampaignComplete?: boolean;
+}
+
+function formatPhaseLabel(phase: SceneCampaignPhase): string {
+    switch (phase) {
+        case 'opening':
+            return 'Opening';
+        case 'rising_action':
+            return 'Rising Action';
+        case 'climax':
+            return 'Climax';
+        case 'finale':
+            return 'Finale';
+        case 'completed':
+            return 'Completed';
+    }
 }
 
 function buildPrompt(input: SceneGenerationRequest): string {
+    const campaignPhase = input.campaignPhase ?? 'opening';
+    const turnNumber = input.turnNumber ?? 1;
+
+    if (input.isCampaignComplete) {
+        return `You are the Dungeon Master for QuestSmith, a cozy fantasy choose-your-own-adventure RPG.
+
+Generate the FINAL campaign completion scene after the player chose: "${input.selectedChoice}"
+
+Campaign context:
+${JSON.stringify({
+            campaignTitle: input.campaignTitle,
+            mainQuestHook: input.mainQuestHook,
+            currentLocation: input.currentLocation,
+            currentLocationDescription: input.currentLocationDescription,
+            currentObjective: input.currentObjective,
+            character: input.character,
+            npcs: input.npcs,
+            recentHistory: input.recentHistory,
+            campaignPhase,
+            turnNumber,
+        }, null, 2)}
+
+Instructions:
+- Resolve the main quest and current objective in a satisfying ending.
+- Reflect major story beats from recent history when possible.
+- Provide a warm, conclusive ending narrative (2-4 short paragraphs max).
+- Do NOT introduce major new plot threads, villains, or unresolved mysteries.
+- Do NOT provide player choices. This is the final scene.
+- Tone: cozy fantasy, funny D&D chaos, YA adventure
+- Do NOT modify HP, XP, gold, inventory, quest status, or location in your response.
+
+Respond with ONLY valid JSON matching this exact shape (no markdown, no code fences):
+{
+  "narrative": "string",
+  "choices": []
+}`;
+    }
+
     const sceneKind = input.isOpeningScene
         ? 'Generate the OPENING scene for this campaign. The hero has just arrived at the starting location. Set the stage with vivid narration and 2-4 meaningful first choices.'
         : `Generate the NEXT scene after the player chose: "${input.selectedChoice}"`;
+
+    const finaleInstructions = input.isFinale
+        ? `
+- This scene is in the ${formatPhaseLabel(campaignPhase)} phase of the campaign.
+- Begin resolving the main quest and current objective.
+- Avoid introducing major new plot threads, villains, or side quests.
+- Keep the story moving toward a satisfying conclusion.`
+        : `
+- This scene is in the ${formatPhaseLabel(campaignPhase)} phase of the campaign.
+- Advance the story naturally for this phase without rushing the ending.`;
 
     return `You are the Dungeon Master for QuestSmith, a cozy fantasy choose-your-own-adventure RPG.
 
@@ -48,6 +122,8 @@ ${JSON.stringify({
         character: input.character,
         npcs: input.npcs,
         recentHistory: input.recentHistory,
+        campaignPhase,
+        turnNumber,
     }, null, 2)}
 
 Instructions:
@@ -55,6 +131,7 @@ Instructions:
 - Include NPC dialogue in the narrative when appropriate.
 - Provide exactly 2-4 player choices with clear labels and intents.
 - Tone: cozy fantasy, funny D&D chaos, YA adventure
+${finaleInstructions}
 - Do NOT modify HP, XP, gold, inventory, quest status, or location in your response.
 - Do NOT resolve combat or dice rolls.
 - Do NOT invent numerical stat changes.
@@ -128,7 +205,7 @@ export const generateScene = onRequest(
                 return;
             }
 
-            if (!data.isOpeningScene && !data.selectedChoice?.trim()) {
+            if (!data.isOpeningScene && !data.isCampaignComplete && !data.selectedChoice?.trim()) {
                 res.status(400).json({ error: 'Selected choice is required for scene continuation.' });
                 return;
             }
@@ -153,6 +230,10 @@ export const generateScene = onRequest(
                 currentLocation: data.currentLocation.trim(),
                 recentHistory: Array.isArray(data.recentHistory) ? data.recentHistory : [],
                 npcs: Array.isArray(data.npcs) ? data.npcs : [],
+                campaignPhase: data.campaignPhase ?? 'opening',
+                turnNumber: data.turnNumber ?? 1,
+                isFinale: Boolean(data.isFinale),
+                isCampaignComplete: Boolean(data.isCampaignComplete),
             }));
 
             const text = result.response.text();

@@ -5,7 +5,8 @@ import { uniqueId } from '../../shared/utils/slugify';
 import { CAMPAIGN_TONE } from '../gemini/geminiPrompts';
 import { requestCampaignGeneration } from '../gemini/geminiService';
 import type { CampaignGenerationResponse } from '../gemini/geminiTypes';
-import type { Campaign, CampaignGenerationInput } from './campaignTypes';
+import type { Campaign, CampaignGenerationInput, CampaignPhase } from './campaignTypes';
+import { getPhaseForTurn } from './campaignPhase';
 
 function findStartingLocationId(
     startingLocationName: string,
@@ -50,14 +51,32 @@ export function mapGeminiResponseToCampaign(response: CampaignGenerationResponse
         description: npc.description,
     }));
 
+    const startingLocation = locationsWithStart.find((location) => location.id === startingLocationId);
+
     return {
         title: response.title,
         tone: CAMPAIGN_TONE,
         mainQuestHook: response.mainQuestHook,
         currentObjective: response.currentObjective,
         currentLocationId: startingLocationId,
+        startingLocationName: startingLocation?.name ?? response.startingLocation,
+        phase: 'opening' as CampaignPhase,
         locations: locationsWithStart,
         npcs,
+    };
+}
+
+export function normalizeCampaignPhase(campaign: Campaign, turnNumber: number): Campaign {
+    const startingLocation = campaign.locations.find(
+        (location) => location.id === campaign.currentLocationId,
+    );
+
+    return {
+        ...campaign,
+        startingLocationName: campaign.startingLocationName
+            ?? startingLocation?.name
+            ?? 'Unknown location',
+        phase: campaign.phase === 'completed' ? 'completed' : getPhaseForTurn(turnNumber),
     };
 }
 
@@ -80,4 +99,18 @@ export async function generateAndSaveCampaign(
     const campaign = mapGeminiResponseToCampaign(geminiResponse);
     await saveCampaignToGame(gameId, campaign);
     return campaign;
+}
+
+export async function startNewAdventure(
+    gameId: string,
+    input: CampaignGenerationInput,
+): Promise<Campaign> {
+    await db.collection(COLLECTIONS.games).doc(gameId).update({
+        status: 'active',
+        campaign: null,
+        currentScene: null,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return generateAndSaveCampaign(gameId, input);
 }

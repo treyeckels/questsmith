@@ -86,5 +86,7 @@ export async function requestSceneGeneration(
         throw new Error('Scene generation returned an empty response.');
     }
 
-    return validateSceneGenerationResponse(payload.scene);
+    return validateSceneGenerationResponse(payload.scene, {
+        isCampaignComplete: input.isCampaignComplete,
+    });
 }

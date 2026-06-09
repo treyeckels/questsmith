@@ -10,11 +10,11 @@ As a new player, I want to create an account so that my character and campaign p
 
 **Acceptance Criteria**
 
-* User can create an account with email/password.
-* User receives a clear error message if sign-up fails.
-* On successful sign-up, the user is redirected to character creation or the active game.
-* A Firebase Auth user is created.
-* No game state is created until the user starts character creation.
+- User can create an account with email/password.
+- User receives a clear error message if sign-up fails.
+- On successful sign-up, the user is redirected to character creation or the active game.
+- A Firebase Auth user is created.
+- No game state is created until the user starts character creation.
 
 ### Story 1.2: Sign in to an existing account
 
@@ -22,10 +22,10 @@ As a returning player, I want to sign in so that I can resume my saved adventure
 
 **Acceptance Criteria**
 
-* User can sign in with email/password.
-* User receives a clear error message if sign-in fails.
-* If the user has an active saved game, they are redirected to the game screen.
-* If the user does not have a saved game, they are redirected to character creation.
+- User can sign in with email/password.
+- User receives a clear error message if sign-in fails.
+- If the user has an active saved game, they are redirected to the game screen.
+- If the user does not have a saved game, they are redirected to character creation.
 
 ### Story 1.3: Sign out
 
@@ -33,9 +33,9 @@ As a player, I want to sign out so that my account is secure on shared devices.
 
 **Acceptance Criteria**
 
-* User can sign out from the app.
-* After sign-out, protected game screens are inaccessible.
-* User is redirected to the sign-in screen.
+- User can sign out from the app.
+- After sign-out, protected game screens are inaccessible.
+- User is redirected to the sign-in screen.
 
 ---
 
@@ -47,11 +47,11 @@ As a player, I want to create a fantasy hero so that I can begin my adventure.
 
 **Acceptance Criteria**
 
-* User can enter a character name.
-* User can select one class: Warrior, Rogue, or Mage.
-* User can select a character portrait.
-* User cannot continue without a valid name, class, and portrait.
-* Character is saved to Firestore under the authenticated user.
+- User can enter a character name.
+- User can select one class: Warrior, Rogue, or Mage.
+- User can select a character portrait.
+- User cannot continue without a valid name, class, and portrait.
+- Character is saved to Firestore under the authenticated user.
 
 ### Story 2.2: Apply class-based starting stats
 
@@ -59,10 +59,10 @@ As a player, I want each class to feel different so that my choice matters.
 
 **Acceptance Criteria**
 
-* Warrior, Rogue, and Mage have different starting stats.
-* Each class includes starting HP, attack modifier, defense modifier, and flavor description.
-* Selected class determines initial character stats.
-* Stats are displayed before the player confirms the character.
+- Warrior, Rogue, and Mage have different starting stats.
+- Each class includes starting HP, attack modifier, defense modifier, and flavor description.
+- Selected class determines initial character stats.
+- Stats are displayed before the player confirms the character.
 
 ### Story 2.3: View character summary
 
@@ -70,9 +70,9 @@ As a player, I want to see my character details so that I understand my hero’s
 
 **Acceptance Criteria**
 
-* Game UI displays character name, class, level, HP, XP, and gold.
-* Character portrait is visible in the main game UI or character panel.
-* Values reflect the latest saved game state.
+- Game UI displays character name, class, level, HP, XP, and gold.
+- Character portrait is visible in the main game UI or character panel.
+- Values reflect the latest saved game state.
 
 ---
 
@@ -84,11 +84,11 @@ As a player, I want the game to generate a new fantasy campaign so that each adv
 
 **Acceptance Criteria**
 
-* After character creation, the app requests a campaign seed from Gemini.
-* Campaign includes title, starting location, main quest hook, initial objective, NPCs, and map locations.
-* Campaign tone matches cozy fantasy, funny D&D chaos, and YA adventure.
-* Campaign data is saved to Firestore.
-* Gemini output is validated before being stored.
+- After character creation, the app requests a campaign seed from Gemini.
+- Campaign includes title, starting location, main quest hook, initial objective, NPCs, and map locations.
+- Campaign tone matches cozy fantasy, funny D&D chaos, and YA adventure.
+- Campaign data is saved to Firestore.
+- Gemini output is validated before being stored.
 
 ### Story 3.2: Start at the opening scene
 
@@ -96,11 +96,11 @@ As a player, I want to begin with a clear opening scene so that I know what is h
 
 **Acceptance Criteria**
 
-* Gemini generates an opening scene for the campaign.
-* Opening scene includes narrative text and 2–4 player choices.
-* Choices are displayed as tappable buttons.
-* Current location is set to the campaign starting location.
-* Turn count starts at 1.
+- Gemini generates an opening scene for the campaign.
+- Opening scene includes narrative text and 2–4 player choices.
+- Choices are displayed as tappable buttons.
+- Current location is set to the campaign starting location.
+- Turn count starts at 1.
 
 ---
 
@@ -112,10 +112,10 @@ As a player, I want to choose what my character does next so that I can shape th
 
 **Acceptance Criteria**
 
-* Current scene displays 2–4 available choices.
-* User can select one choice.
-* Selected choice is stored in turn history.
-* App prevents duplicate submissions while the next scene is loading.
+- Current scene displays 2–4 available choices.
+- User can select one choice.
+- Selected choice is stored in turn history.
+- App prevents duplicate submissions while the next scene is loading.
 
 ### Story 4.2: Generate the next scene
 
@@ -123,11 +123,11 @@ As a player, I want Gemini to narrate what happens next so that the adventure fe
 
 **Acceptance Criteria**
 
-* App sends current game state and selected choice to Gemini.
-* Gemini returns scene narration, NPC dialogue when appropriate, and new choices.
-* Gemini does not directly overwrite HP, XP, gold, inventory, level, or quest state.
-* App displays the new scene after successful response.
-* Updated scene is saved to Firestore.
+- App sends current game state and selected choice to Gemini.
+- Gemini returns scene narration, NPC dialogue when appropriate, and new choices.
+- Gemini does not directly overwrite HP, XP, gold, inventory, level, or quest state.
+- App displays the new scene after successful response.
+- Updated scene is saved to Firestore.
 
 ### Story 4.3: Track turn history
 
@@ -135,9 +135,9 @@ As a player, I want my adventure history saved so that the game can maintain con
 
 **Acceptance Criteria**
 
-* Each turn stores selected choice, resulting scene summary, timestamp, location, and relevant game events.
-* Turn history is saved to Firestore.
-* MVP supports at least 10–15 turns in a campaign.
+- Each turn stores selected choice, resulting scene summary, timestamp, location, and relevant game events.
+- Turn history is saved to Firestore.
+- MVP supports at least 10–15 turns in a campaign.
 
 ---
 
@@ -149,10 +149,10 @@ As a player, I want the app to consistently track my stats and progress so that 
 
 **Acceptance Criteria**
 
-* App stores HP, inventory, gold, XP, level, quest status, location, dice rolls, and combat state.
-* Gemini can suggest narrative consequences, but the app determines actual state changes.
-* State updates are saved after each turn.
-* UI reflects the latest state after each update.
+- App stores HP, inventory, gold, XP, level, quest status, location, dice rolls, and combat state.
+- Gemini can suggest narrative consequences, but the app determines actual state changes.
+- State updates are saved after each turn.
+- UI reflects the latest state after each update.
 
 ### Story 5.2: Apply rewards and penalties
 
@@ -160,11 +160,11 @@ As a player, I want choices to have consequences so that the game feels interact
 
 **Acceptance Criteria**
 
-* App can add or remove gold.
-* App can add or remove inventory items.
-* App can add XP.
-* App can reduce or restore HP.
-* All changes are shown to the user in the UI.
+- App can add or remove gold.
+- App can add or remove inventory items.
+- App can add XP.
+- App can reduce or restore HP.
+- All changes are shown to the user in the UI.
 
 ---
 
@@ -176,10 +176,10 @@ As a player, I want to encounter enemies so that the adventure has stakes.
 
 **Acceptance Criteria**
 
-* Gemini can suggest a combat encounter.
-* App creates enemy state with name, HP, attack modifier, and reward values.
-* Combat encounter is displayed clearly to the player.
-* Player can choose to attack or attempt another available action.
+- Gemini can suggest a combat encounter.
+- App creates enemy state with name, HP, attack modifier, and reward values.
+- Combat encounter is displayed clearly to the player.
+- Player can choose to attack or attempt another available action.
 
 ### Story 6.2: Resolve combat with visible dice rolls
 
@@ -187,11 +187,11 @@ As a player, I want combat to use visible dice rolls so that outcomes feel fair 
 
 **Acceptance Criteria**
 
-* App rolls a virtual d20 for attacks.
-* Dice roll is displayed to the player.
-* App applies class/stat modifiers.
-* App determines hit, miss, damage, and enemy defeat.
-* Gemini may narrate the result but does not determine the numerical outcome.
+- App rolls a virtual d20 for attacks.
+- Dice roll is displayed to the player.
+- App applies class/stat modifiers.
+- App determines hit, miss, damage, and enemy defeat.
+- Gemini may narrate the result but does not determine the numerical outcome.
 
 ### Story 6.3: Complete combat
 
@@ -199,10 +199,10 @@ As a player, I want combat to end clearly so that I understand the result.
 
 **Acceptance Criteria**
 
-* Combat ends when enemy HP reaches 0 or player HP reaches 0.
-* On victory, player may receive XP, gold, or item rewards.
-* On defeat, MVP displays a simple defeat state or recovery option.
-* Combat outcome is saved to Firestore.
+- Combat ends when enemy HP reaches 0 or player HP reaches 0.
+- On victory, player may receive XP, gold, or item rewards.
+- On defeat, MVP displays a simple defeat state or recovery option.
+- Combat outcome is saved to Firestore.
 
 ---
 
@@ -214,9 +214,9 @@ As a player, I want to view my items so that I know what I have collected.
 
 **Acceptance Criteria**
 
-* Inventory screen or panel lists all current items.
-* Each item displays name, type, and description.
-* Empty inventory state is handled gracefully.
+- Inventory screen or panel lists all current items.
+- Each item displays name, type, and description.
+- Empty inventory state is handled gracefully.
 
 ### Story 7.2: Gain an item
 
@@ -224,10 +224,10 @@ As a player, I want to receive items from choices, quests, or combat so that my 
 
 **Acceptance Criteria**
 
-* App can add an item to inventory.
-* Item includes name, type, description, optional stat effect, and source.
-* Gemini can generate item flavor text.
-* App validates item structure before saving.
+- App can add an item to inventory.
+- Item includes name, type, description, optional stat effect, and source.
+- Gemini can generate item flavor text.
+- App validates item structure before saving.
 
 ### Story 7.3: Lose or consume an item
 
@@ -235,9 +235,9 @@ As a player, I want items to be removable so that inventory reflects story conse
 
 **Acceptance Criteria**
 
-* App can remove an item from inventory.
-* Removed items no longer appear in the inventory UI.
-* Item removal is recorded in turn history.
+- App can remove an item from inventory.
+- Removed items no longer appear in the inventory UI.
+- Item removal is recorded in turn history.
 
 ---
 
@@ -249,9 +249,9 @@ As a player, I want to know my current objective so that I understand what I am 
 
 **Acceptance Criteria**
 
-* Game displays current quest title and objective.
-* Quest has status: not started, active, completed, or failed.
-* Quest data is saved in Firestore.
+- Game displays current quest title and objective.
+- Quest has status: not started, active, completed, or failed.
+- Quest data is saved in Firestore.
 
 ### Story 8.2: Update quest status
 
@@ -259,10 +259,10 @@ As a player, I want my quest to progress based on choices and outcomes so that t
 
 **Acceptance Criteria**
 
-* App can update quest status based on deterministic game events.
-* Gemini can suggest quest progression, but app validates and applies updates.
-* Quest changes are shown to the player.
-* Quest changes are stored in turn history.
+- App can update quest status based on deterministic game events.
+- Gemini can suggest quest progression, but app validates and applies updates.
+- Quest changes are shown to the player.
+- Quest changes are stored in turn history.
 
 ---
 
@@ -274,10 +274,10 @@ As a player, I want my game to save automatically so that I do not lose progress
 
 **Acceptance Criteria**
 
-* Game state is saved to Firestore after character creation.
-* Game state is saved after campaign generation.
-* Game state is saved after each completed turn.
-* User receives a clear error if saving fails.
+- Game state is saved to Firestore after character creation.
+- Game state is saved after campaign generation.
+- Game state is saved after each completed turn.
+- User receives a clear error if saving fails.
 
 ### Story 9.2: Resume saved game
 
@@ -285,10 +285,10 @@ As a returning player, I want to resume my game so that I can continue my advent
 
 **Acceptance Criteria**
 
-* On sign-in, app checks for an active saved game.
-* If saved game exists, app loads character, campaign, scene, choices, inventory, quest, and location state.
-* User resumes at the most recent scene.
-* User does not need to regenerate the campaign.
+- On sign-in, app checks for an active saved game.
+- If saved game exists, app loads character, campaign, scene, choices, inventory, quest, and location state.
+- User resumes at the most recent scene.
+- User does not need to regenerate the campaign.
 
 ---
 
@@ -300,11 +300,11 @@ As a player, I want the app to feel like a fantasy adventure so that the experie
 
 **Acceptance Criteria**
 
-* UI uses fantasy-inspired styling.
-* Main game screen prioritizes story text and choices.
-* UI is mobile-first and responsive.
-* Text is readable on mobile devices.
-* Loading states feel polished and thematic.
+- UI uses fantasy-inspired styling.
+- Main game screen prioritizes story text and choices.
+- UI is mobile-first and responsive.
+- Text is readable on mobile devices.
+- Loading states feel polished and thematic.
 
 ### Story 10.2: Display static fantasy assets
 
@@ -312,11 +312,11 @@ As a player, I want to see images that support the story so that the game feels 
 
 **Acceptance Criteria**
 
-* App displays character portraits.
-* App displays static location images.
-* App displays a campaign map.
-* Missing assets have graceful fallbacks.
-* No AI-generated images are created during gameplay for MVP.
+- App displays character portraits.
+- App displays static location images.
+- App displays a campaign map.
+- Missing assets have graceful fallbacks.
+- No AI-generated images are created during gameplay for MVP.
 
 ---
 
@@ -328,10 +328,10 @@ As a developer, I want Gemini responses to follow a predictable structure so tha
 
 **Acceptance Criteria**
 
-* Gemini prompts request structured JSON responses.
-* App validates required fields before updating game state.
-* Invalid responses show a retry or fallback state.
-* Gemini narrative content is separated from deterministic state updates.
+- Gemini prompts request structured JSON responses.
+- App validates required fields before updating game state.
+- Invalid responses show a retry or fallback state.
+- Gemini narrative content is separated from deterministic state updates.
 
 ### Story 11.2: Handle Gemini failure
 
@@ -339,10 +339,10 @@ As a player, I want the app to recover gracefully if AI generation fails so that
 
 **Acceptance Criteria**
 
-* App shows a friendly error message if Gemini request fails.
-* User can retry the request.
-* Existing saved game state is not corrupted.
-* Failed AI responses are not committed as completed turns.
+- App shows a friendly error message if Gemini request fails.
+- User can retry the request.
+- Existing saved game state is not corrupted.
+- Failed AI responses are not committed as completed turns.
 
 ---
 
@@ -354,8 +354,73 @@ As a developer, I want the MVP to be demo-ready so that I can show my AI-assiste
 
 **Acceptance Criteria**
 
-* User can complete the full MVP flow from sign-up to gameplay.
-* Demo supports at least 10–15 turns.
-* Demo includes character creation, campaign generation, choices, combat, inventory changes, and resume.
-* README explains the hybrid AI architecture.
-* Repo includes SRS, user stories, architecture notes, and prompt strategy.
+- User can complete the full MVP flow from sign-up to gameplay.
+- Demo supports at least 10–15 turns.
+- Demo includes character creation, campaign generation, choices, combat, inventory changes, and resume.
+- README explains the hybrid AI architecture.
+- Repo includes SRS, user stories, architecture notes, and prompt strategy.
+
+## Epic 13: Campaign Completion
+
+### Story: Complete a Campaign
+
+**As a player,**
+I want the adventure to reach a satisfying conclusion,
+**so that** my choices feel meaningful and the story has a clear ending.
+
+#### Acceptance Criteria
+
+- The game tracks the current campaign phase.
+- Campaign phases include:
+  - Opening
+  - Rising Action
+  - Climax
+  - Finale
+  - Completed
+
+- The campaign progresses through phases as the player advances through turns.
+- When the campaign enters the Finale phase, Gemini is instructed to resolve the main quest and avoid introducing major new plot threads.
+- A campaign completion scene is generated that:
+  - Resolves the main objective
+  - Provides an ending narrative
+  - Reflects major story events when possible
+
+- The completed campaign is saved to Firestore.
+- The player sees a Campaign Complete screen.
+
+---
+
+### Story: Start a New Adventure
+
+**As a player,**
+I want to begin a new adventure after completing one,
+**so that** I can continue playing QuestSmith.
+
+#### Acceptance Criteria
+
+- A "Start New Adventure" button is displayed after campaign completion.
+- Selecting the button generates a new campaign.
+- The player keeps their character.
+- The new campaign has a different title, quest hook, and starting scenario.
+- Previous campaigns remain available in saved history (future enhancement).
+
+---
+
+### Story: View Campaign Summary
+
+**As a player,**
+I want to review what happened during my adventure,
+**so that** I can remember the story I created.
+
+#### Acceptance Criteria
+
+- A campaign summary screen is available after completion.
+- The summary includes:
+  - Campaign title
+  - Main objective
+  - Starting location
+  - Number of turns played
+  - Major story events
+
+- The summary is generated from saved campaign data.
+- The summary can be viewed again after returning to the game.

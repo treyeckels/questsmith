@@ -3,14 +3,29 @@ import { db } from '../../firebase';
 import { COLLECTIONS } from '../../shared/firebase/firestorePaths';
 import { createCharacterGame } from '../character/characterService';
 import type { Character, CharacterCreationInput } from '../character/characterTypes';
-import type { ActiveGame, GameDocument, GameSummary, Scene, TurnDocument } from './gameTypes';
+import type {
+    ActiveGame,
+    CampaignCompletionRecord,
+    CompletedGame,
+    GameDocument,
+    GameSummary,
+    Scene,
+    TurnDocument,
+} from './gameTypes';
+import type { Campaign } from '../campaign/campaignTypes';
+import { normalizeCampaignPhase } from '../campaign/campaignService';
 
 function mapGameDoc(id: string, data: GameDocument): GameSummary {
+    const turnNumber = data.currentScene?.turnNumber ?? 1;
+
     return {
         id,
         character: data.character,
-        campaign: data.campaign ?? null,
+        campaign: data.campaign
+            ? normalizeCampaignPhase(data.campaign, turnNumber)
+            : null,
         status: data.status,
+        campaignCompletion: data.campaignCompletion ?? null,
     };
 }
 
@@ -19,12 +34,29 @@ function mapActiveGameDoc(id: string, data: GameDocument): ActiveGame | null {
         return null;
     }
 
+    const turnNumber = data.currentScene?.turnNumber ?? 1;
+
+    return {
+        id,
+        character: data.character,
+        campaign: normalizeCampaignPhase(data.campaign, turnNumber),
+        currentScene: data.currentScene ?? null,
+        status: data.status,
+        campaignCompletion: data.campaignCompletion ?? null,
+    };
+}
+
+function mapCompletedGameDoc(id: string, data: GameDocument): CompletedGame | null {
+    if (!data.campaign || !data.campaignCompletion || data.status !== 'completed') {
+        return null;
+    }
+
     return {
         id,
         character: data.character,
         campaign: data.campaign,
-        currentScene: data.currentScene ?? null,
-        status: data.status,
+        status: 'completed',
+        campaignCompletion: data.campaignCompletion,
     };
 }
 
@@ -102,14 +134,86 @@ export function gameNeedsCampaignGeneration(game: GameSummary): boolean {
     return !game.campaign;
 }
 
-export async function getPostAuthPath(userId: string): Promise<string> {
-    const game = await getActiveGame(userId);
+export async function getCompletedGame(userId: string): Promise<CompletedGame | null> {
+    try {
+        const snapshot = await db
+            .collection(COLLECTIONS.games)
+            .where('userId', '==', userId)
+            .where('status', '==', 'completed')
+            .limit(1)
+            .get();
 
-    if (!game) {
+        if (snapshot.empty) {
+            return null;
+        }
+
+        const doc = snapshot.docs[0];
+        return mapCompletedGameDoc(doc.id, doc.data() as GameDocument);
+    } catch (error) {
+        const code = (error as { code?: string })?.code;
+        if (code === 'permission-denied') {
+            console.warn('Unable to load completed game.', error);
+            return null;
+        }
+        throw error;
+    }
+}
+
+export async function getLatestGame(userId: string): Promise<GameSummary | null> {
+    const activeGame = await getActiveGame(userId);
+    if (activeGame) {
+        return activeGame;
+    }
+
+    const completedGame = await getCompletedGame(userId);
+    if (completedGame) {
+        return completedGame;
+    }
+
+    try {
+        const snapshot = await db
+            .collection(COLLECTIONS.games)
+            .where('userId', '==', userId)
+            .limit(1)
+            .get();
+
+        if (snapshot.empty) {
+            return null;
+        }
+
+        const doc = snapshot.docs[0];
+        return mapGameDoc(doc.id, doc.data() as GameDocument);
+    } catch (error) {
+        const code = (error as { code?: string })?.code;
+        if (code === 'permission-denied') {
+            return null;
+        }
+        throw error;
+    }
+}
+
+export async function getPostAuthPath(userId: string): Promise<string> {
+    const activeGame = await getActiveGame(userId);
+
+    if (activeGame) {
+        if (gameNeedsCampaignGeneration(activeGame)) {
+            return '/campaign/generate';
+        }
+
+        return '/game';
+    }
+
+    const completedGame = await getCompletedGame(userId);
+    if (completedGame) {
+        return '/campaign/complete';
+    }
+
+    const latestGame = await getLatestGame(userId);
+    if (!latestGame) {
         return '/character/create';
     }
 
-    if (gameNeedsCampaignGeneration(game)) {
+    if (gameNeedsCampaignGeneration(latestGame)) {
         return '/campaign/generate';
     }
 
@@ -158,6 +262,53 @@ export async function getRecentTurnSummaries(gameId: string, limit: number): Pro
         .map((doc) => (doc.data() as TurnDocument).sceneSummary)
         .filter(Boolean)
         .reverse();
+}
+
+export async function getAllTurnRecords(gameId: string): Promise<TurnDocument[]> {
+    const snapshot = await db.collection(COLLECTIONS.games).doc(gameId)
+        .collection('turns')
+        .orderBy('turnNumber', 'asc')
+        .get();
+
+    return snapshot.docs.map((doc) => doc.data() as TurnDocument);
+}
+
+export async function getTurnCount(gameId: string): Promise<number> {
+    const snapshot = await db.collection(COLLECTIONS.games).doc(gameId)
+        .collection('turns')
+        .get();
+
+    return snapshot.size;
+}
+
+export async function updateCampaignPhase(gameId: string, campaign: Campaign): Promise<void> {
+    await db.collection(COLLECTIONS.games).doc(gameId).update({
+        campaign,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+}
+
+export async function completeCampaign(
+    gameId: string,
+    options: {
+        campaign: Campaign;
+        endingScene: Scene;
+        completion: Omit<CampaignCompletionRecord, 'completedAt'>;
+    },
+): Promise<void> {
+    await db.collection(COLLECTIONS.games).doc(gameId).update({
+        status: 'completed',
+        campaign: {
+            ...options.campaign,
+            phase: 'completed',
+        },
+        currentScene: stripUndefined(options.endingScene),
+        campaignCompletion: {
+            ...stripUndefined(options.completion),
+            completedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        },
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
 }
 
 export type { Character };

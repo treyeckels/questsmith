@@ -1,9 +1,17 @@
-import firebase from 'firebase/compat/app';
 import type { SceneGenerationResponse } from '../gemini/geminiTypes';
 import { requestSceneGeneration } from '../gemini/geminiService';
+import { normalizeCampaignPhase } from '../campaign/campaignService';
+import { getPhaseForTurn, shouldGenerateCompletionScene } from '../campaign/campaignPhase';
 import { uniqueId } from '../../shared/utils/slugify';
 import type { ActiveGame, Scene, SceneChoice, TurnDocument } from './gameTypes';
-import { getRecentTurnSummaries, saveTurnRecord, updateCurrentScene } from './gameService';
+import {
+    completeCampaign,
+    getAllTurnRecords,
+    getRecentTurnSummaries,
+    saveTurnRecord,
+    updateCampaignPhase,
+    updateCurrentScene,
+} from './gameService';
 
 function getCurrentLocation(game: ActiveGame) {
     const location = game.campaign.locations.find(
@@ -23,16 +31,20 @@ function buildSceneRequest(
         selectedChoice: string | null;
         isOpeningScene: boolean;
         recentHistory: string[];
+        turnNumber: number;
+        isCampaignComplete: boolean;
     },
 ) {
     const location = getCurrentLocation(game);
+    const campaign = normalizeCampaignPhase(game.campaign, options.turnNumber);
+    const campaignPhase = options.isCampaignComplete ? 'completed' : campaign.phase;
 
     return {
-        campaignTitle: game.campaign.title,
-        mainQuestHook: game.campaign.mainQuestHook,
+        campaignTitle: campaign.title,
+        mainQuestHook: campaign.mainQuestHook,
         currentLocation: location.name,
         currentLocationDescription: location.description,
-        currentObjective: game.campaign.currentObjective,
+        currentObjective: campaign.currentObjective,
         character: {
             name: game.character.name,
             class: game.character.class,
@@ -42,11 +54,15 @@ function buildSceneRequest(
         },
         selectedChoice: options.selectedChoice,
         recentHistory: options.recentHistory,
-        npcs: game.campaign.npcs.map((npc) => ({
+        npcs: campaign.npcs.map((npc) => ({
             name: npc.name,
             role: npc.role,
         })),
         isOpeningScene: options.isOpeningScene,
+        campaignPhase,
+        turnNumber: options.turnNumber,
+        isFinale: campaignPhase === 'finale' || options.isCampaignComplete,
+        isCampaignComplete: options.isCampaignComplete,
     };
 }
 
@@ -54,6 +70,7 @@ export function mapGeminiResponseToScene(
     response: SceneGenerationResponse,
     turnNumber: number,
     locationId: string,
+    options: { isEndingScene?: boolean } = {},
 ): Scene {
     const choices: SceneChoice[] = response.choices.map((choice, index) => {
         const mapped: SceneChoice = {
@@ -69,13 +86,36 @@ export function mapGeminiResponseToScene(
         return mapped;
     });
 
-    return {
+    const scene: Scene = {
         id: `scene-${turnNumber}-${Date.now()}`,
         turnNumber,
         locationId,
         narrative: response.narrative,
         choices,
     };
+
+    if (options.isEndingScene) {
+        scene.isEndingScene = true;
+    }
+
+    return scene;
+}
+
+function buildMajorEvents(turns: TurnDocument[]) {
+    if (turns.length === 0) {
+        return [];
+    }
+
+    const selectedTurns = turns.filter((turn, index) => (
+        index === 0
+        || index === turns.length - 1
+        || index % 2 === 0
+    )).slice(0, 6);
+
+    return selectedTurns.map((turn) => ({
+        turnNumber: turn.turnNumber,
+        description: `${turn.selectedChoiceLabel}: ${turn.sceneSummary.slice(0, 140)}`,
+    }));
 }
 
 export async function generateOpeningScene(game: ActiveGame): Promise<Scene> {
@@ -84,13 +124,78 @@ export async function generateOpeningScene(game: ActiveGame): Promise<Scene> {
             selectedChoice: null,
             isOpeningScene: true,
             recentHistory: [],
+            turnNumber: 1,
+            isCampaignComplete: false,
         }),
     );
 
     const location = getCurrentLocation(game);
     const scene = mapGeminiResponseToScene(geminiResponse, 1, location.id);
+    const updatedCampaign = normalizeCampaignPhase(game.campaign, 1);
+
+    await updateCampaignPhase(game.id, updatedCampaign);
     await updateCurrentScene(game.id, scene);
     return scene;
+}
+
+async function generateCompletionScene(
+    game: ActiveGame,
+    selectedChoice: SceneChoice,
+    currentScene: Scene,
+): Promise<Scene> {
+    const recentHistory = await getRecentTurnSummaries(game.id, 5);
+    const nextTurnNumber = currentScene.turnNumber + 1;
+
+    const geminiResponse = await requestSceneGeneration(
+        buildSceneRequest(game, {
+            selectedChoice: `${selectedChoice.label} (${selectedChoice.intent})`,
+            isOpeningScene: false,
+            recentHistory,
+            turnNumber: nextTurnNumber,
+            isCampaignComplete: true,
+        }),
+    );
+
+    const location = getCurrentLocation(game);
+    const endingScene = mapGeminiResponseToScene(
+        geminiResponse,
+        nextTurnNumber,
+        location.id,
+        { isEndingScene: true },
+    );
+
+    const turnRecord: Omit<TurnDocument, 'createdAt'> = {
+        turnNumber: currentScene.turnNumber,
+        selectedChoiceId: selectedChoice.id,
+        selectedChoiceLabel: selectedChoice.label,
+        sceneSummary: geminiResponse.narrative.slice(0, 500),
+        locationId: currentScene.locationId,
+        events: [],
+    };
+
+    await saveTurnRecord(game.id, turnRecord);
+
+    const allTurns = await getAllTurnRecords(game.id);
+    const campaign = normalizeCampaignPhase(game.campaign, nextTurnNumber);
+    const completedCampaign = {
+        ...campaign,
+        phase: 'completed' as const,
+    };
+
+    await completeCampaign(game.id, {
+        campaign: completedCampaign,
+        endingScene,
+        completion: {
+            title: campaign.title,
+            mainObjective: campaign.currentObjective,
+            startingLocationName: campaign.startingLocationName,
+            endingNarrative: geminiResponse.narrative,
+            turnsPlayed: allTurns.length,
+            majorEvents: buildMajorEvents(allTurns),
+        },
+    });
+
+    return endingScene;
 }
 
 export async function advanceStoryWithChoice(
@@ -107,19 +212,27 @@ export async function advanceStoryWithChoice(
         throw new Error('That choice is no longer available.');
     }
 
+    if (shouldGenerateCompletionScene(currentScene.turnNumber)) {
+        return generateCompletionScene(game, selectedChoice, currentScene);
+    }
+
     const recentHistory = await getRecentTurnSummaries(game.id, 5);
+    const nextTurnNumber = currentScene.turnNumber + 1;
+
     const geminiResponse = await requestSceneGeneration(
         buildSceneRequest(game, {
             selectedChoice: `${selectedChoice.label} (${selectedChoice.intent})`,
             isOpeningScene: false,
             recentHistory,
+            turnNumber: nextTurnNumber,
+            isCampaignComplete: false,
         }),
     );
 
     const location = getCurrentLocation(game);
     const nextScene = mapGeminiResponseToScene(
         geminiResponse,
-        currentScene.turnNumber + 1,
+        nextTurnNumber,
         location.id,
     );
 
@@ -132,7 +245,10 @@ export async function advanceStoryWithChoice(
         events: [],
     };
 
+    const updatedCampaign = normalizeCampaignPhase(game.campaign, nextTurnNumber);
+
     await saveTurnRecord(game.id, turnRecord);
+    await updateCampaignPhase(game.id, updatedCampaign);
     await updateCurrentScene(game.id, nextScene);
 
     return nextScene;

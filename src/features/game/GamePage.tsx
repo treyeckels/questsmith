@@ -40,6 +40,7 @@ const GamePage: React.FC = () => {
         isLoading,
         isBusy,
         isError,
+        isCompleted,
     } = useGameplay(user?.uid);
 
     useEffect(() => {
@@ -54,8 +55,13 @@ const GamePage: React.FC = () => {
 
         if (gameNeedsCampaignGeneration(game)) {
             history.replace('/campaign/generate');
+            return;
         }
-    }, [game, history, isLoading]);
+
+        if (isCompleted || game.status === 'completed') {
+            history.replace('/campaign/complete');
+        }
+    }, [game, history, isCompleted, isLoading]);
 
     const handleSignOut = async () => {
         await signOut();
@@ -165,7 +171,13 @@ const GamePage: React.FC = () => {
                                         ))}
                                     </div>
 
-                                    {!isError && (
+                                    {!isError && scene.isEndingScene && (
+                                        <div className="game-page__ending">
+                                            <p>The adventure reaches its conclusion.</p>
+                                        </div>
+                                    )}
+
+                                    {!isError && !scene.isEndingScene && scene.choices.length > 0 && (
                                         <div className="game-page__choices">
                                             <h3>What do you do?</h3>
                                             {scene.choices.map((choice) => (
@@ -193,6 +205,14 @@ const GamePage: React.FC = () => {
                     </section>
 
                     <div className="game-page__footer">
+                        {game.campaignCompletion && (
+                            <FantasyButton
+                                variant="secondary"
+                                onClick={() => history.push('/campaign/summary')}
+                            >
+                                Last Adventure Summary
+                            </FantasyButton>
+                        )}
                         <FantasyButton variant="secondary" onClick={handleSignOut}>
                             Sign Out
                         </FantasyButton>
