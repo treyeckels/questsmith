@@ -10,8 +10,8 @@ import NewAdventurePage from '../features/campaign/NewAdventurePage';
 import CharacterCreationPage from '../features/character/CharacterCreationPage';
 import GamePage from '../features/game/GamePage';
 import GuestRoute from '../shared/components/GuestRoute';
+import LandingRoute from '../shared/components/LandingRoute';
 import ProtectedRoute from '../shared/components/ProtectedRoute';
-import RootRedirect from '../shared/components/RootRedirect';
 
 const AppRoutes: React.FC = () => (
     <IonRouterOutlet>
@@ -56,7 +56,7 @@ const AppRoutes: React.FC = () => (
             </ProtectedRoute>
         </Route>
         <Route exact path="/">
-            <RootRedirect />
+            <LandingRoute />
         </Route>
     </IonRouterOutlet>
 );

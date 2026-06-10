@@ -55,7 +55,7 @@ Gemini suggests narrative consequences; the app calculates and saves the actual 
 | 3    | Random campaign generation                                          | Done   |
 | 4+   | Gameplay loop, combat, inventory, quests, persistence               | Done   |
 | 5    | Analytics                                                           | Done   |
-
+| 6    | Landing Page                                                           | Done   |
 ## Getting Started
 
 ### Prerequisites
