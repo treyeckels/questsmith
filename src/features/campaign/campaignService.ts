@@ -2,6 +2,8 @@ import firebase from 'firebase/compat/app';
 import { db } from '../../firebase';
 import { COLLECTIONS } from '../../shared/firebase/firestorePaths';
 import { uniqueId } from '../../shared/utils/slugify';
+import type { CharacterClass } from '../character/characterTypes';
+import { trackCampaignStarted } from '../analytics/analyticsService';
 import { CAMPAIGN_TONE } from '../gemini/geminiPrompts';
 import { requestCampaignGeneration } from '../gemini/geminiService';
 import type { CampaignGenerationResponse } from '../gemini/geminiTypes';
@@ -91,6 +93,7 @@ export async function saveCampaignToGame(gameId: string, campaign: Campaign): Pr
 export async function generateAndSaveCampaign(
     gameId: string,
     input: CampaignGenerationInput,
+    options: { isNewAdventure?: boolean } = {},
 ): Promise<Campaign> {
     const geminiResponse = await requestCampaignGeneration({
         characterName: input.characterName,
@@ -99,6 +102,13 @@ export async function generateAndSaveCampaign(
 
     const campaign = mapGeminiResponseToCampaign(geminiResponse);
     await saveCampaignToGame(gameId, campaign);
+
+    trackCampaignStarted({
+        campaign_id: gameId,
+        character_class: input.characterClass as CharacterClass,
+        is_new_adventure: options.isNewAdventure ?? false,
+    });
+
     return campaign;
 }
 
@@ -127,5 +137,5 @@ export async function startNewAdventure(
 
     await db.collection(COLLECTIONS.games).doc(gameId).update(updatePayload);
 
-    return generateAndSaveCampaign(gameId, input);
+    return generateAndSaveCampaign(gameId, input, { isNewAdventure: true });
 }

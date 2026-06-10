@@ -19,6 +19,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import FantasyButton from '../../shared/components/FantasyButton';
 import FantasyFrame from '../../shared/components/FantasyFrame';
+import { trackLogin, trackLoginScreenViewed, trackSignUp } from '../analytics/analyticsService';
 import { getPostAuthPath } from '../game/gameService';
 import { getAuthErrorMessage } from './authErrors';
 import {
@@ -46,6 +47,10 @@ const AuthPage: React.FC = () => {
     };
 
     useEffect(() => {
+        trackLoginScreenViewed();
+    }, []);
+
+    useEffect(() => {
         let cancelled = false;
 
         handleGoogleRedirectResult()
@@ -53,6 +58,13 @@ const AuthPage: React.FC = () => {
                 if (cancelled || !result?.user?.uid) {
                     return;
                 }
+
+                if (result.additionalUserInfo?.isNewUser) {
+                    trackSignUp({ auth_method: 'google' });
+                } else {
+                    trackLogin({ auth_method: 'google' });
+                }
+
                 await redirectAfterAuth(result.user.uid);
             })
             .catch((error) => {
@@ -95,6 +107,7 @@ const AuthPage: React.FC = () => {
             if (!userId) {
                 throw new Error('Authentication succeeded without a user.');
             }
+            trackLogin({ auth_method: 'email' });
             await redirectAfterAuth(userId);
         } catch (error) {
             setStatusMessage({ type: 'error', text: getAuthErrorMessage(error) });
@@ -120,6 +133,7 @@ const AuthPage: React.FC = () => {
             if (!userId) {
                 throw new Error('Authentication succeeded without a user.');
             }
+            trackSignUp({ auth_method: 'email' });
             await redirectAfterAuth(userId);
         } catch (error) {
             setStatusMessage({ type: 'error', text: getAuthErrorMessage(error) });
@@ -165,6 +179,12 @@ const AuthPage: React.FC = () => {
             const userId = result.user?.uid;
             if (!userId) {
                 throw new Error('Authentication succeeded without a user.');
+            }
+
+            if (result.additionalUserInfo?.isNewUser) {
+                trackSignUp({ auth_method: 'google' });
+            } else {
+                trackLogin({ auth_method: 'google' });
             }
 
             await redirectAfterAuth(userId);

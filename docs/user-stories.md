@@ -550,3 +550,50 @@ I want to track my growth,
 
 - Values update after rewards.
 - Progress persists between sessions.
+
+## Epic: Analytics
+
+### Story: Track Gameplay Events
+
+As a developer,
+I want to track key gameplay events,
+so that I can understand whether players are engaging with QuestSmith.
+
+#### Acceptance Criteria
+
+- Firebase Analytics is configured for the web app.
+- Analytics events are logged for:
+  - sign_up
+  - login
+  - character_created
+  - campaign_started
+  - story_turn_completed
+  - item_acquired
+  - combat_started
+  - combat_completed
+  - campaign_completed
+- Events include useful parameters where appropriate:
+  - character_class
+  - campaign_id
+  - turn_number
+  - item_rarity
+  - combat_result
+- Analytics failures do not break gameplay.
+- No sensitive personal data is included in analytics events.
+
+### Story: Track Player Funnel
+
+As a developer,
+I want to understand where players drop off,
+so that I can improve onboarding and gameplay.
+
+#### Acceptance Criteria
+
+- The app tracks the funnel:
+  - visit/login screen
+  - account created or login completed
+  - character created
+  - campaign generated
+  - first story choice made
+  - campaign completed
+- Funnel events can be viewed in Firebase/Google Analytics.
