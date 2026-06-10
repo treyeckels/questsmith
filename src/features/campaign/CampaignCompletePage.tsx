@@ -11,6 +11,7 @@ import {
 import { ribbonOutline } from 'ionicons/icons';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { openFeedbackForm } from '../feedback/feedbackService';
 import FantasyButton from '../../shared/components/FantasyButton';
 import FantasyFrame from '../../shared/components/FantasyFrame';
 import { useAuth } from '../../shared/hooks/useAuth';
@@ -109,6 +110,12 @@ const CampaignCompletePage: React.FC = () => {
                                     onClick={() => history.push('/campaign/summary')}
                                 >
                                     View Campaign Summary
+                                </FantasyButton>
+                                <FantasyButton
+                                    variant="secondary"
+                                    onClick={openFeedbackForm}
+                                >
+                                    Leave Feedback
                                 </FantasyButton>
                             </div>
                         </div>
