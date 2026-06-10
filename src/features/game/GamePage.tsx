@@ -24,6 +24,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { signOut } from '../auth/authService';
 import { getClassDefinition, getPortraitDefinition, HEROES_SPRITE_URL } from '../character/characterConfig';
+import AppMenu from '../../shared/components/AppMenu';
 import FantasyButton from '../../shared/components/FantasyButton';
 import { useAuth } from '../../shared/hooks/useAuth';
 import { useGameplay } from '../../shared/hooks/useGameplay';
@@ -120,6 +121,7 @@ const GamePage: React.FC = () => {
                 <IonToolbar>
                     <IonTitle>{campaign.title}</IonTitle>
                     <IonButtons slot="end">
+                        <AppMenu />
                         <IonButton
                             className="game-page__inventory-button"
                             fill="clear"

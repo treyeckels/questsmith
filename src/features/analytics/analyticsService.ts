@@ -141,3 +141,7 @@ export function trackCombatCompleted(params: CombatCompletedEventParams): void {
 export function trackCampaignCompleted(params: CampaignCompletedEventParams): void {
     logEvent('campaign_completed', toParams(params));
 }
+
+export function trackFeedbackFormOpened(): void {
+    logEvent('feedback_form_opened');
+}
