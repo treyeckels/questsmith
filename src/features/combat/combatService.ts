@@ -1,5 +1,6 @@
 import type { ChoiceRiskLevel } from '../game/gameTypes';
 import type { ActiveGame } from '../game/gameTypes';
+import { trackCombatCompleted, trackItemAcquired } from '../analytics/analyticsService';
 import { requestCombatNarration } from '../gemini/geminiService';
 import { addItemToInventory } from '../inventory/inventoryService';
 import type { InventoryItem } from '../inventory/inventoryTypes';
@@ -150,6 +151,23 @@ export async function executeCombatAttack(game: ActiveGame): Promise<CombatAttac
             lastCombatTurn: game.combatState.startedAtTurn,
         });
 
+        trackCombatCompleted({
+            campaign_id: game.id,
+            enemy_id: turnResult.enemy.id,
+            combat_result: 'victory',
+            turn_number: game.combatState.startedAtTurn,
+        });
+
+        if (awardedItem) {
+            trackItemAcquired({
+                campaign_id: game.id,
+                item_type: awardedItem.type,
+                item_rarity: awardedItem.rarity,
+                source: 'combat',
+                turn_number: game.combatState.startedAtTurn,
+            });
+        }
+
         return {
             combatState: {
                 ...game.combatState,
@@ -170,6 +188,13 @@ export async function executeCombatAttack(game: ActiveGame): Promise<CombatAttac
 
     if (turnResult.phase === 'defeat') {
         await defeatGame(game.id, updatedCharacter);
+
+        trackCombatCompleted({
+            campaign_id: game.id,
+            enemy_id: turnResult.enemy.id,
+            combat_result: 'defeat',
+            turn_number: game.combatState.startedAtTurn,
+        });
 
         return {
             combatState: {

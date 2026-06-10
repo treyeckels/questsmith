@@ -1,4 +1,10 @@
 import type { SceneGenerationResponse } from '../gemini/geminiTypes';
+import {
+    trackCampaignCompleted,
+    trackCombatStarted,
+    trackItemAcquired,
+    trackStoryTurnCompleted,
+} from '../analytics/analyticsService';
 import { requestSceneGeneration } from '../gemini/geminiService';
 import { normalizeCampaignPhase } from '../campaign/campaignService';
 import { getPhaseForTurn, shouldGenerateCompletionScene } from '../campaign/campaignPhase';
@@ -146,6 +152,14 @@ async function processItemReward(
     const updatedInventory = addItemToInventory(game.inventory, awardedItem);
     await persistInventoryReward(game.id, updatedInventory, options.turnNumber);
 
+    trackItemAcquired({
+        campaign_id: game.id,
+        item_type: awardedItem.type,
+        item_rarity: awardedItem.rarity,
+        source: 'story',
+        turn_number: options.turnNumber,
+    });
+
     return awardedItem;
 }
 
@@ -174,6 +188,13 @@ async function maybeStartCombatEncounter(
 
     const combatState = startCombatEncounter(turnNumber);
     await persistNewCombatEncounter(game, combatState);
+
+    trackCombatStarted({
+        campaign_id: game.id,
+        enemy_id: combatState.enemy.id,
+        turn_number: turnNumber,
+    });
+
     return combatState;
 }
 
@@ -241,6 +262,12 @@ async function generateCompletionScene(
 
     await saveTurnRecord(game.id, turnRecord);
 
+    trackStoryTurnCompleted({
+        campaign_id: game.id,
+        turn_number: currentScene.turnNumber,
+        campaign_phase: 'completed',
+    });
+
     const allTurns = await getAllTurnRecords(game.id);
     const campaign = normalizeCampaignPhase(game.campaign, nextTurnNumber);
     const completedCampaign = {
@@ -259,6 +286,11 @@ async function generateCompletionScene(
             turnsPlayed: allTurns.length,
             majorEvents: buildMajorEvents(allTurns),
         },
+    });
+
+    trackCampaignCompleted({
+        campaign_id: game.id,
+        turns_played: allTurns.length,
     });
 
     return { scene: endingScene, awardedItem: null, combatState: null };
@@ -323,6 +355,12 @@ export async function advanceStoryWithChoice(
     await saveTurnRecord(game.id, turnRecord);
     await updateCampaignPhase(game.id, updatedCampaign);
     await updateCurrentScene(game.id, nextScene);
+
+    trackStoryTurnCompleted({
+        campaign_id: game.id,
+        turn_number: currentScene.turnNumber,
+        campaign_phase: updatedCampaign.phase,
+    });
 
     const combatState = await maybeStartCombatEncounter(
         {

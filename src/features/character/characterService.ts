@@ -1,6 +1,7 @@
 import firebase from 'firebase/compat/app';
 import { db } from '../../firebase';
 import { COLLECTIONS } from '../../shared/firebase/firestorePaths';
+import { trackCharacterCreated } from '../analytics/analyticsService';
 import { validateCharacterName } from '../../shared/utils/validators';
 import { getClassDefinition } from './characterConfig';
 import type { Character, CharacterCreationInput } from './characterTypes';
@@ -64,6 +65,11 @@ export async function createCharacterGame(
         lastCombatTurn: null,
         combatState: null,
         quests: [],
+    });
+
+    trackCharacterCreated({
+        character_class: character.class,
+        campaign_id: gameRef.id,
     });
 
     return gameRef.id;
