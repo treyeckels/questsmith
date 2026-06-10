@@ -31,6 +31,21 @@ Gemini suggests narrative consequences; the app calculates and saves the actual 
 - **AI:** Gemini API (planned via Cloud Functions)
 - **Mobile:** Capacitor (optional native builds)
 
+## Events tracked
+
+| Event                  | When                             | Parameters                                                         |
+| ---------------------- | -------------------------------- | ------------------------------------------------------------------ |
+| `screen_view`          | Login page loads                 | `screen_name`                                                      |
+| `login`                | Email or Google sign-in          | `auth_method`                                                      |
+| `sign_up`              | Email or Google account creation | `auth_method`                                                      |
+| `character_created`    | Character saved to Firestore     | `character_class`, `campaign_id`                                   |
+| `campaign_started`     | Campaign generated and saved     | `campaign_id`, `character_class`, `is_new_adventure`               |
+| `story_turn_completed` | Player choice advances the story | `campaign_id`, `turn_number`, `campaign_phase`                     |
+| `item_acquired`        | Item added from story or combat  | `campaign_id`, `item_type`, `item_rarity`, `source`, `turn_number` |
+| `combat_started`       | Random encounter triggers        | `campaign_id`, `enemy_id`, `turn_number`                           |
+| `combat_completed`     | Combat ends in victory or defeat | `campaign_id`, `enemy_id`, `combat_result`, `turn_number`          |
+| `campaign_completed`   | Campaign reaches ending scene    | `campaign_id`, `turns_played`                                      |
+
 ## Current Status
 
 | Epic | Feature                                                             | Status |
@@ -39,6 +54,7 @@ Gemini suggests narrative consequences; the app calculates and saves the actual 
 | 2    | Character creation                                                  | Done   |
 | 3    | Random campaign generation                                          | Done   |
 | 4+   | Gameplay loop, combat, inventory, quests, persistence               | Done   |
+| 5    | Analytics                                                           | Done   |
 
 ## Getting Started
 
