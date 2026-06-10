@@ -597,3 +597,63 @@ so that I can improve onboarding and gameplay.
   - first story choice made
   - campaign completed
 - Funnel events can be viewed in Firebase/Google Analytics.
+
+## Epic: Public Website
+
+### Story: Learn About QuestSmith
+
+As a visitor,
+
+I want to understand what QuestSmith is before creating an account,
+
+so that I can decide whether I want to play.
+
+#### Acceptance Criteria
+
+- A public landing page exists at "/".
+- The landing page is accessible without authentication.
+- The page explains:
+  - What QuestSmith is
+  - How the game works
+  - Key features
+
+- The page includes screenshots of gameplay.
+- The page matches the QuestSmith fantasy visual style.
+- The page is mobile-first and responsive.
+
+---
+
+### Story: Start Playing
+
+As a visitor,
+
+I want a clear way to begin playing,
+
+so that I can quickly enter the game.
+
+#### Acceptance Criteria
+
+- A prominent "Play Now" call-to-action exists.
+- The button routes users to login or account creation.
+- Navigation works on desktop and mobile.
+
+---
+
+### Story: View Gameplay Features
+
+As a visitor,
+
+I want to see examples of gameplay,
+
+so that I understand the experience before signing up.
+
+#### Acceptance Criteria
+
+- The landing page displays screenshots of:
+  - Character Creation
+  - Campaign Generation
+  - Combat
+  - Inventory
+
+- Screenshots are optimized for mobile viewing.
+- Images include short descriptions.

@@ -145,3 +145,11 @@ export function trackCampaignCompleted(params: CampaignCompletedEventParams): vo
 export function trackFeedbackFormOpened(): void {
     logEvent('feedback_form_opened');
 }
+
+export function trackLandingPageViewed(): void {
+    logEvent('landing_page_viewed');
+}
+
+export function trackPlayNowClicked(): void {
+    logEvent('play_now_clicked');
+}
